@@ -38,7 +38,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','
 .tabs-wrap::-webkit-scrollbar{display:none}
 .tabs{display:inline-flex;gap:6px;padding:0 20px;white-space:nowrap}
 .tab{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;background:var(--card);color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;border:1px solid transparent;-webkit-tap-highlight-color:transparent}
-.tab .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--red)}.tab.active{font-weight:600;transform:scale(1.03)}
+.tab .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.tab.active{font-weight:600;transform:scale(1.03)}
 .dir-bar{margin:10px 20px 0;padding:12px 16px;background:var(--card);border-radius:14px;border:1px solid var(--border);display:flex;align-items:center;font-size:13px;gap:8px}
 .dir-from,.dir-to{font-weight:600;color:var(--text)}.dir-arrow{color:var(--dim)}
 .dir-tag{margin-left:auto;font-size:11px;color:var(--dim);background:rgba(255,255,255,.03);padding:3px 10px;border-radius:8px}
@@ -193,7 +193,7 @@ class Engine{
 }
 function getTransferBoth(tr,sn,nowSec){const td=LINES[tr];if(!td)return{op:false,from:'',to:''};const tc=LINE_CUM[tr],si=td.stations.findIndex(s=>s.n===sn);if(si<0)return{op:false,from:td.from,to:td.to};const isOp=nowSec>=td.firstTrain*60&&nowSec<=td.lastTrain*60+tc[tc.length-1];if(!isOp)return{op:false,to:td.to,from:td.from};const m=nowSec/60,iv=((m>=420&&m<=540)||(m>=1020&&m<=1140))?td.peakInterval:td.offpeakInterval;const at=tc[si];let d1=null,d2=null;for(let t0=td.firstTrain*60;t0<=td.lastTrain*60;t0+=iv){const df=t0+at-nowSec;if(df>-td.dwell){if(d1===null)d1=df;else if(d2===null){d2=df;break}}}return{op:true,to:td.to,from:td.from,d1,d2}}
 let curLine='1号线',engine=new Engine(curLine),lastSec=-1;
-function renderTabs(){document.getElementById('lineTabs').innerHTML=Object.keys(LINES).map(name=>{const d=LINES[name];return'<div class="tab '+(name===curLine?'active':'')+'" style="'+(name===curLine?'background:'+d.color+'22;color:'+d.color+';border-color:'+d.color+'33':'')+'" onclick="switchLine(\''+name+'\')"><span class="dot"></span>'+name+'</div>'}).join('')}
+function renderTabs(){document.getElementById('lineTabs').innerHTML=Object.keys(LINES).map(name=>{const d=LINES[name];return'<div class="tab '+(name===curLine?'active':'')+'" style="'+(name===curLine?'background:'+d.color+'22;color:'+d.color+';border-color:'+d.color+'33':'')+'" onclick="switchLine(\''+name+'\')"><span class="dot" style="background:'+d.color+'"></span>'+name+'</div>'}).join('')}
 function updateDir(){const d=LINES[curLine];document.getElementById('dirBar').innerHTML='<span class="dir-from">'+d.from+'</span><span class="dir-arrow">→</span><span class="dir-to">'+d.to+'</span><span class="dir-tag">'+d.stations.length+'站</span>'}
 function ft(t){if(t===null)return{text:'暂无班次',color:'#3e4f6a'};return{text:fmt(t)+'后到达',color:timeColor(t)||'#7b8ba4'}}
 function mkBadge(s){return'<span class="tr-badge" style="background:'+s.tc+'18;color:'+s.tc+';border:1px solid '+s.tc+'33">'+badgeContent(s.tr)+'</span>'}
