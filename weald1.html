@@ -51,7 +51,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','
 .dot-passed{background:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(232,56,79,.3)}
 .dot-dwell{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,.35);width:11px;height:11px;animation:dotPulse 1.6s ease-in-out infinite}
 .dot-arriving{background:var(--red);border-color:var(--red);box-shadow:0 0 10px rgba(232,56,79,.3);position:relative}
-.dot-arriving::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--red);animation:breathe 2.4s ease-in-out infinite}
+.dot-arriving::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--red);animation:breathe 2s ease-in-out infinite}
 @keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 @keyframes breathe{0%,100%{transform:scale(1);opacity:.25}50%{transform:scale(2);opacity:.7}}
 .name-col{flex:1;min-width:0}.name-line{display:flex;align-items:center;gap:6px;line-height:1.4}
