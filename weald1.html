@@ -6,17 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<!-- 微信分享卡片 / Open Graph -->
-<meta property="og:title" content="郑州地铁 · 实时到站">
-<meta property="og:description" content="覆盖郑州10条线路、250个站点，到站倒计时精确到秒。郑州人的地铁出行助手。">
-<meta property="og:image" content="https://weald1120.github.io/Weald1/thumbnail.jpg">
-<meta property="og:image:width" content="300">
-<meta property="og:image:height" content="300">
-<meta property="og:image:type" content="image/jpeg">
-<meta property="og:url" content="https://weald1120.github.io/Weald1/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="郑州地铁">
-<title>郑州地铁 · 实时到站 v2</title>
+<title>郑州地铁 · 实时到站</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -61,9 +51,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','
 .dot-passed{background:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(232,56,79,.3)}
 .dot-dwell{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,.35);width:11px;height:11px;animation:dotPulse 1.6s ease-in-out infinite}
 .dot-arriving{background:var(--red);border-color:var(--red);box-shadow:0 0 10px rgba(232,56,79,.3);position:relative}
-.dot-arriving::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--red);animation:ripple .8s cubic-bezier(0,1,1,0) infinite;opacity:0}
+.dot-arriving::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--red);animation:breathe 2.4s ease-in-out infinite}
 @keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
-@keyframes ripple{0%{transform:scale(1);opacity:.7}to{transform:scale(2.5);opacity:0}}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.25}50%{transform:scale(2);opacity:.7}}
 .name-col{flex:1;min-width:0}.name-line{display:flex;align-items:center;gap:6px;line-height:1.4}
 .st-name{font-size:15px;font-weight:600;color:var(--text)}
 .times-col{flex-shrink:0;text-align:right;min-width:100px}.t-main{display:flex;align-items:baseline;gap:3px;justify-content:flex-end}
