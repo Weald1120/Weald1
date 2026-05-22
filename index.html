@@ -49,9 +49,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','
 .dot-col{flex-shrink:0;width:10px;padding-top:6px}
 .dot{width:10px;height:10px;border-radius:50%;border:2px solid rgba(232,56,79,.4);background:transparent;transition:all .3s}
 .dot-passed{background:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(232,56,79,.3)}
-.dot-dwell{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,.35);width:11px;height:11px;animation:dotPulse 1.6s ease-in-out infinite}
+.dot-dwell{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,.35);width:11px;height:11px;animation:dotPulse 1.6s ease-in-out infinite}.dot-dwell span{position:absolute;inset:-4px;border:2px solid var(--amber);border-radius:50%;animation:wave-expand 1.6s ease-out infinite;opacity:0}
 .dot-arriving{background:var(--red);border-color:var(--red);box-shadow:0 0 10px rgba(232,56,79,.3);position:relative}
-.dot-arriving span{position:absolute;inset:-4px;border:2px solid var(--amber);border-radius:50%;animation:wave-expand 1.6s ease-out infinite;opacity:0}
+.dot-arriving span{position:absolute;inset:-4px;border:2px solid var(--red);border-radius:50%;animation:wave-expand 1.6s ease-out infinite;opacity:0}
+.dot-dwell span{border-color:var(--amber)}
 .dot-arriving span:nth-child(2){animation-delay:.4s}
 .dot-arriving span:nth-child(3){animation-delay:.8s}
 @keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
@@ -189,7 +190,7 @@ function badgeContent(name){
 }
 class Engine{
   constructor(n){this.name=n;this.data=LINES[n];this.cum=LINE_CUM[n];this.totalCycle=this.cum[this.cum.length-1]}
-  predict(nowSec){const d=this.data,res=[];const isOp=nowSec>=d.firstTrain*60&&nowSec<=d.lastTrain*60+this.totalCycle;const intv=this.getIntv(nowSec,d);let inTransit=0;const adjNow=nowSec-TIME_OFFSET;for(let t0=d.firstTrain*60;t0<=d.lastTrain*60;t0+=intv){if(t0<=adjNow&&t0+this.totalCycle>adjNow)inTransit++}for(let i=0;i<d.stations.length;i++){const arr=[],at=this.cum[i];for(let t0=d.firstTrain*60;t0<=d.lastTrain*60;t0+=intv){const diff=t0+at-nowSec+TIME_OFFSET;if(diff>-d.dwell&&diff<3600)arr.push({s:diff})}arr.sort((a,b)=>a.s-b.s);res.push(arr)}return{a:res,op:isOp,c:inTransit||(isOp?1:0)}}
+  predict(nowSec){const d=this.data,res=[];const isOp=nowSec>=d.firstTrain*60&&nowSec<=d.lastTrain*60+this.totalCycle;const intv=this.getIntv(nowSec,d);let inTransit=0;const adjNow=nowSec-TIME_OFFSET;for(let t0=d.firstTrain*60;t0<=d.lastTrain*60&&t0<=adjNow+this.totalCycle;){if(t0<=adjNow&&t0+this.totalCycle>adjNow)inTransit++;let t0m=t0/60;t0+=((t0m>=420&&t0m<=540)||(t0m>=1020&&t0m<=1140))?d.peakInterval:d.offpeakInterval}for(let i=0;i<d.stations.length;i++){const arr=[],at=this.cum[i];for(let t0=d.firstTrain*60;t0<=d.lastTrain*60;t0+=intv){const diff=t0+at-nowSec+TIME_OFFSET;if(diff>-d.dwell&&diff<3600)arr.push({s:diff})}arr.sort((a,b)=>a.s-b.s);res.push(arr)}return{a:res,op:isOp,c:inTransit||(isOp?1:0)}}
   getIntv(nowSec,d){const m=nowSec/60;return((m>=420&&m<=540)||(m>=1020&&m<=1140))?d.peakInterval:d.offpeakInterval}
 }
 function getTransferBoth(tr,sn,nowSec){const td=LINES[tr];if(!td)return{op:false,from:'',to:''};const tc=LINE_CUM[tr],si=td.stations.findIndex(s=>s.n===sn);if(si<0)return{op:false,from:td.from,to:td.to};const isOp=nowSec>=td.firstTrain*60&&nowSec<=td.lastTrain*60+tc[tc.length-1];if(!isOp)return{op:false,to:td.from===td.to?'环线':td.to,from:td.from===td.to?'环线':td.from};const m=nowSec/60,iv=((m>=420&&m<=540)||(m>=1020&&m<=1140))?td.peakInterval:td.offpeakInterval;const at=tc[si];let d1=null,d2=null;for(let t0=td.firstTrain*60;t0<=td.lastTrain*60;t0+=iv){const df=t0+at-nowSec+TIME_OFFSET;if(df>-td.dwell){if(d1===null)d1=df;else if(d2===null){d2=df;break}}}const fl=td.from===td.to?'内环':td.from,tl=td.from===td.to?'外环':td.to;return{op:true,to:tl,from:fl,d1,d2}}
