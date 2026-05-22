@@ -1,0 +1,253 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<!-- 微信分享卡片 / Open Graph -->
+<meta property="og:title" content="郑州地铁 · 实时到站">
+<meta property="og:description" content="覆盖郑州10条线路、250个站点，到站倒计时精确到秒。郑州人的地铁出行助手。">
+<meta property="og:image" content="https://weald1120.github.io/Weald1/thumbnail.jpg">
+<meta property="og:image:width" content="300">
+<meta property="og:image:height" content="300">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:url" content="https://weald1120.github.io/Weald1/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="郑州地铁">
+<title>郑州地铁 · 实时到站</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#000;--surface:#080b12;--card:#0a0e18;--border:rgba(255,255,255,.06);--text:#e4e8f0;--muted:#7b8ba4;--dim:#3e4f6a;--red:#e8384f;--amber:#fbbf24}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(8,11,18,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tab-item svg{width:24px;height:24px;fill:none;stroke:var(--dim);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.tab-item span{font-size:10px;color:var(--dim);margin-top:2px;transition:color .2s}
+.tab-item.active svg{stroke:var(--red)}.tab-item.active span{color:var(--red)}
+.page{display:none;padding-bottom:80px}.page.active{display:block}
+.status-bar{padding:16px 24px 4px;display:flex;justify-content:flex-end}
+.clock{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+.header{padding:12px 24px 10px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:22px;font-weight:700}
+.live{font-size:11px;color:var(--red);font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.live::before{content:'';width:8px;height:8px;border-radius:50%;border:2px solid var(--red);border-top-color:transparent;animation:spinner .8s linear infinite;display:inline-block}
+@keyframes spinner{to{transform:rotate(360deg)}}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* 骨架屏微光 */
+@keyframes shimmer{0%{background-position:-200% 0}to{background-position:200% 0}}
+.skel{background:linear-gradient(90deg,rgba(255,255,255,.02) 0%,rgba(255,255,255,.06) 40%,rgba(255,255,255,.02) 80%);background-size:200% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:12px}
+.skel.s-row{height:44px;margin:2px 8px;width:auto}
+@media(prefers-reduced-motion:reduce){.dot-arriving::after,.skel,.live::before{animation:none}.dot-dwell{animation:none}}
+.tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:8px 0 6px}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tabs{display:inline-flex;gap:6px;padding:0 20px;white-space:nowrap}
+.tab{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;background:var(--card);color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;border:1px solid transparent;-webkit-tap-highlight-color:transparent}
+.tab .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;border:0;box-shadow:none;outline:none;background-clip:padding-box}.tab.active{font-weight:600;transform:scale(1.03)}
+.dir-bar{margin:10px 20px 0;padding:10px 14px;background:var(--card);border-radius:14px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;user-select:none;cursor:pointer;-webkit-tap-highlight-color:transparent}.dir-bar:active{transform:scale(.98);background:rgba(255,255,255,.05)}
+.dir-content{display:flex;align-items:center;gap:8px}
+.dir-from,.dir-to{font-weight:600;color:var(--text);white-space:nowrap}.dir-arrow{color:var(--text);margin:0 8px;font-size:16px;font-weight:700}
+.dir-tag{margin-left:auto;font-size:11px;color:var(--dim);background:rgba(255,255,255,.03);padding:3px 10px;border-radius:8px}
+.offline-banner{margin:10px 20px 0;padding:10px 16px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.12);border-radius:12px;font-size:12px;color:var(--amber)}
+.sec{padding:12px 20px 0}.sec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sec-t{font-size:12px;font-weight:600;color:var(--muted)}.sec-m{font-size:11px;color:var(--dim)}
+.card{background:var(--surface);border-radius:16px;border:1px solid var(--border);overflow:hidden;padding:4px 0;transition:opacity .25s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.row{padding:6px 16px;margin:2px 8px;border-radius:12px;display:flex;align-items:flex-start;gap:10px;opacity:1;animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both}
+.dot-col{flex-shrink:0;width:10px;padding-top:6px}
+.dot{width:10px;height:10px;border-radius:50%;border:2px solid rgba(232,56,79,.4);background:transparent;transition:all .3s}
+.dot-passed{background:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(232,56,79,.3)}
+.dot-dwell{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,.35);width:11px;height:11px;animation:dotPulse 1.6s ease-in-out infinite}
+.dot-arriving{background:var(--red);border-color:var(--red);box-shadow:0 0 10px rgba(232,56,79,.3);position:relative}
+.dot-arriving::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--red);animation:ripple .8s cubic-bezier(0,1,1,0) infinite;opacity:0}
+@keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+@keyframes ripple{0%{transform:scale(1);opacity:.7}to{transform:scale(2.5);opacity:0}}
+.name-col{flex:1;min-width:0}.name-line{display:flex;align-items:center;gap:6px;line-height:1.4}
+.st-name{font-size:15px;font-weight:600;color:var(--text)}
+.times-col{flex-shrink:0;text-align:right;min-width:100px}.t-main{display:flex;align-items:baseline;gap:3px;justify-content:flex-end}
+.t-val{font-size:16px;font-weight:600;line-height:1;font-family:'DM Mono',monospace}.t-unit{font-size:10px;line-height:1}
+.t-next{font-size:10px;color:var(--dim);margin-top:1px}.t-hint{font-size:11px;color:#e8384f;font-weight:600;text-align:right;margin-top:2px}
+.row-passed .st-name{color:var(--dim)}.row-passed .times-col{opacity:.35}.row-has-tr{min-height:68px}
+.tr-group{margin-top:6px;display:flex;gap:8px}.tr-badge-col{flex-shrink:0;display:flex}
+.tr-badge{
+  font-size:9px;font-weight:700;padding:4px 3px;border-radius:4px;
+  white-space:nowrap;line-height:1.2;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+}
+.tr-rows-col{display:flex;flex-direction:column;gap:6px;flex:1;justify-content:center}
+.tr-info-row{display:flex;align-items:center;gap:6px}
+.tr-arrow{font-size:10px;color:var(--dim);flex-shrink:0}
+.tr-dir{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
+.tr-time{font-size:11px;font-weight:600;white-space:nowrap}
+.profile-header{text-align:center;padding:30px 20px 20px}
+.avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--red),#b01e33);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:28px}
+.profile-name{font-size:18px;font-weight:700}.profile-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.stats-bar{display:flex;margin:16px 20px;background:var(--surface);border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.stat-item{flex:1;text-align:center;padding:14px 0}.stat-item+.stat-item{border-left:1px solid var(--border)}
+.stat-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace}.stat-label{font-size:11px;color:var(--dim);margin-top:2px}
+.menu-section{margin:16px 20px 0}.menu-title{font-size:12px;color:var(--dim);font-weight:600;padding:0 4px 8px}
+.menu-card{background:var(--surface);border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.menu-item{display:flex;align-items:center;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.menu-item:active{background:rgba(255,255,255,.03)}.menu-item+.menu-item{border-top:1px solid var(--border)}
+.menu-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:12px;flex-shrink:0}
+.menu-text{flex:1}.menu-text .m-title{font-size:14px;font-weight:500}.menu-text .m-desc{font-size:11px;color:var(--dim);margin-top:1px}
+.menu-arrow{color:var(--dim);font-size:14px}.menu-badge{background:var(--red);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;margin-right:8px}
+.sub-page{display:none;padding-bottom:20px}.sub-page.active{display:block}
+.sub-header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.back-btn{width:32px;height:32px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+.sub-title{font-size:16px;font-weight:600}
+.notif-list{padding:12px 20px}.notif-card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:14px 16px;margin-bottom:10px}
+.notif-card .n-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:8px}
+.notif-card .n-title{font-size:14px;font-weight:600;margin-bottom:4px}.notif-card .n-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.notif-card .n-time{font-size:11px;color:var(--dim);margin-top:8px}
+.notif-main{padding:12px 20px}
+.notif-refresh{display:flex;justify-content:flex-end;margin-bottom:8px}
+.notif-refresh button{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:8px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px}
+.notif-source{font-size:10px;color:var(--dim);text-align:center;margin-top:16px;padding-bottom:20px}
+.bug-form{padding:16px 20px}.form-group{margin-bottom:16px}
+.form-label{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block}
+.form-input,.form-select,.form-textarea{width:100%;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-family:inherit;outline:none}
+.form-textarea{min-height:100px;resize:vertical}.form-select{appearance:none}
+.submit-btn{width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.submit-btn:active{opacity:.8}
+.records-empty{text-align:center;padding:60px 20px;color:var(--dim)}.records-empty .re-icon{font-size:48px;margin-bottom:12px;opacity:.5}
+.setting-section{margin:12px 20px}.setting-title{font-size:12px;color:var(--dim);font-weight:600;padding:0 4px 8px}
+.setting-card{background:var(--surface);border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.setting-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}.setting-item+.setting-item{border-top:1px solid var(--border)}
+.setting-left{font-size:14px}.setting-right{font-size:13px;color:var(--dim)}
+.toggle{width:44px;height:26px;border-radius:13px;background:var(--dim);position:relative;cursor:pointer;transition:background .2s}
+.toggle.on{background:var(--red)}.toggle::after{content:'';position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s}
+.toggle.on::after{transform:translateX(18px)}
+.about-content{padding:30px 20px;text-align:center}
+.about-logo{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,var(--red),#b01e33);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 8px 30px rgba(232,56,79,.25)}
+.about-name{font-size:20px;font-weight:700}.about-ver{font-size:12px;color:var(--dim);margin-top:4px}
+.about-desc{font-size:13px;color:var(--muted);margin-top:16px;line-height:1.8;max-width:300px;margin-left:auto;margin-right:auto}
+.about-info{margin-top:30px}
+.about-info .ai-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px}
+.about-info .ai-label{color:var(--muted)}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);background:rgba(0,0,0,.85);color:#fff;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:500;z-index:999;opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+</style>
+</head>
+<body>
+<div id="page-metro" class="page active">
+  <div class="status-bar"><span class="clock" id="clock">--:--:--</span></div>
+  <div class="header"><h1>郑州地铁</h1><span class="live">LIVE</span></div>
+  <div class="tabs-wrap"><div class="tabs" id="lineTabs"></div></div>
+  <div class="dir-bar" id="dirBar"></div>
+  <div id="offlineBanner" class="offline-banner" style="display:none">当前非运营时段，显示首班车预估</div>
+  <div class="sec">
+    <div class="sec-h"><span class="sec-t">实时到站</span><span class="sec-m" id="meta">--</span></div>
+    <div class="card" id="stationCard"></div>
+  </div>
+</div>
+<div id="page-notif-main" class="page">
+  <div class="status-bar"><span class="clock" id="clock2">--:--:--</span></div>
+  <div class="header"><h1>通知</h1><span class="live">INFO</span></div>
+  <div class="notif-main">
+    <div class="notif-refresh"><button onclick="fetchNotifs()">↻ 刷新</button></div>
+    <div id="notifContent"></div>
+    <div class="notif-source">数据来源：郑州地铁官方公告 · 每日自动同步</div>
+  </div>
+</div>
+<div id="page-me" class="page">
+  <div class="profile-header"><div class="avatar">🚇</div><div class="profile-name">通勤达人</div><div class="profile-sub">郑州地铁出行助手</div></div>
+  <div class="stats-bar"><div class="stat-item"><div class="stat-val">0</div><div class="stat-label">乘车次数</div></div><div class="stat-item"><div class="stat-val">0</div><div class="stat-label">节省时间</div></div><div class="stat-item"><div class="stat-val">0</div><div class="stat-label">覆盖站点</div></div></div>
+  <div class="menu-section"><div class="menu-title">功能</div><div class="menu-card">
+    <div class="menu-item" onclick="showSubPage('bug')"><div class="menu-icon" style="background:rgba(251,191,36,.12)">🐛</div><div class="menu-text"><div class="m-title">Bug 反馈</div><div class="m-desc">数据异常、功能问题</div></div><span class="menu-arrow">›</span></div>
+    <div class="menu-item" onclick="showSubPage('records')"><div class="menu-icon" style="background:rgba(56,189,248,.12)">📊</div><div class="menu-text"><div class="m-title">出行记录</div><div class="m-desc">历史乘车数据</div></div><span class="menu-arrow">›</span></div>
+  </div></div>
+  <div class="menu-section"><div class="menu-title">其他</div><div class="menu-card">
+    <div class="menu-item" onclick="showSubPage('settings')"><div class="menu-icon" style="background:rgba(255,255,255,.06)">⚙️</div><div class="menu-text"><div class="m-title">设置</div><div class="m-desc">提醒、刷新频率</div></div><span class="menu-arrow">›</span></div>
+    <div class="menu-item" onclick="showSubPage('about')"><div class="menu-icon" style="background:rgba(167,139,250,.12)">ℹ️</div><div class="menu-text"><div class="m-title">关于</div><div class="m-desc">版本信息</div></div><span class="menu-arrow">›</span></div>
+  </div></div>
+</div>
+<div id="page-notif" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">←</div><span class="sub-title">通知</span></div><div class="notif-list"><div class="notif-card"><span class="n-tag" style="background:rgba(232,56,79,.12);color:#e8384f">运营调整</span><div class="n-title">1号线延长运营通知</div><div class="n-desc">为配合郑州火车站客流高峰，1号线末班车延长30分钟。</div><div class="n-time">2025-05-18</div></div><div class="notif-card"><span class="n-tag" style="background:rgba(251,191,36,.12);color:#fbbf24">到站提醒</span><div class="n-title">8号线新增智能提醒</div><div class="n-desc">8号线已支持即将到站提醒功能。</div><div class="n-time">2025-05-15</div></div><div class="notif-card"><span class="n-tag" style="background:rgba(56,189,248,.12);color:#38bdf8">新线开通</span><div class="n-title">7号线即将开通</div><div class="n-desc">郑州地铁7号线预计2025年下半年开通运营。</div><div class="n-time">2025-05-10</div></div></div></div>
+<div id="page-bug" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">←</div><span class="sub-title">Bug 反馈</span></div><div class="bug-form"><div class="form-group"><label class="form-label">反馈类型</label><select class="form-select" id="bugType"><option>数据不准确</option><option>倒计时异常</option><option>换乘信息错误</option><option>页面显示问题</option><option>其他</option></select></div><div class="form-group"><label class="form-label">涉及线路</label><select class="form-select" id="bugLine"><option>1号线</option><option>2号线</option><option>3号线</option><option>4号线</option><option>5号线</option><option>6号线</option><option>8号线</option><option>10号线</option><option>14号线</option></select></div><div class="form-group"><label class="form-label">问题描述</label><textarea class="form-textarea" id="bugDesc" placeholder="请详细描述你遇到的问题..."></textarea></div><div class="form-group"><label class="form-label">联系方式（可选）</label><input class="form-input" id="bugContact" placeholder="邮箱或微信号"></div><button class="submit-btn" onclick="submitBug()">提交反馈</button></div></div>
+<div id="page-records" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">←</div><span class="sub-title">出行记录</span></div><div class="records-empty"><div class="re-icon">📋</div><div>暂无出行记录</div></div></div>
+<div id="page-settings" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">←</div><span class="sub-title">设置</span></div><div class="setting-section"><div class="setting-title">提醒设置</div><div class="setting-card"><div class="setting-item"><span class="setting-left">即将到站提醒</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="setting-item"><span class="setting-left">停靠中提醒</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="setting-item"><span class="setting-left">末班车提醒</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div></div></div><div class="setting-section"><div class="setting-title">刷新设置</div><div class="setting-card"><div class="setting-item"><span class="setting-left">刷新频率</span><span class="setting-right">1秒</span></div><div class="setting-item"><span class="setting-left">省电模式</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div></div></div><div class="setting-section"><div class="setting-title">默认设置</div><div class="setting-card"><div class="setting-item"><span class="setting-left">默认线路</span><span class="setting-right">1号线</span></div><div class="setting-item"><span class="setting-left">默认方向</span><span class="setting-right">河南工业大学→河南大学新区</span></div></div></div></div>
+<div id="page-about" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">←</div><span class="sub-title">关于</span></div><div class="about-content"><div class="about-logo">🚇</div><div class="about-name">郑州地铁 · 实时到站</div><div class="about-ver">v2.0.0</div><div class="about-desc">覆盖郑州全线网 10 条线路、221 个站点，实时倒计时精确到秒。</div><div class="about-info"><div class="ai-row"><span class="ai-label">线路数量</span><span>10 条</span></div><div class="ai-row"><span class="ai-label">覆盖站点</span><span>221 个</span></div><div class="ai-row"><span class="ai-label">数据来源</span><span>时刻表推算</span></div><div class="ai-row"><span class="ai-label">更新频率</span><span>每秒刷新</span></div></div></div></div>
+<div class="tab-bar"><div class="tab-item active" onclick="switchTab('metro')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3"/><line x1="4" y1="10" x2="20" y2="10"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/><line x1="9" y1="17" x2="9" y2="18.5"/><line x1="15" y1="17" x2="15" y2="18.5"/></svg><span>地铁</span></div><div class="tab-item" onclick="switchTab('notif-main')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>通知</span></div><div class="tab-item" onclick="switchTab('me')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>我的</span></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const LINES={
+"1号线":{color:"#e8384f",from:"河南工业大学",to:"河南大学新区",firstTrain:360,lastTrain:1380,peakInterval:240,offpeakInterval:380,dwell:30,stations:[{n:"河南工业大学",t:0},{n:"郑大科技园",t:140},{n:"郑州大学",tr:"8号线",tc:"#84cc16",t:270},{n:"梧桐街",t:400},{n:"兰寨",t:530},{n:"铁炉",tr:"14号线",tc:"#a78bfa",t:660},{n:"市民中心",t:790},{n:"西流湖",t:920},{n:"西三环",t:1050},{n:"秦岭路",t:1180},{n:"五一公园·市中医院",tr:"5号线",tc:"#7c3aed",t:1310},{n:"碧沙岗",t:1440},{n:"绿城广场",tr:"10号线",tc:"#06b6d4",t:1570},{n:"医学院",tr:"7号线",tc:"#d4a574",t:1700},{n:"郑州火车站",t:1830},{n:"二七广场",tr:"3号线",tc:"#22c55e",t:1960},{n:"人民路·河南中医一附院",t:2090},{n:"紫荆山",tr:"2号线",tc:"#f59e0b",t:2220},{n:"燕庄",tr:"6号线",tc:"#a855f7",t:2350},{n:"民航路",t:2480},{n:"会展中心",tr:"4号线",tc:"#3b82f6",t:2610},{n:"黄河南路",t:2740},{n:"农业南路",t:2870},{n:"东风南路",t:3000},{n:"郑州东站",tr:"5号线",tc:"#7c3aed",t:3130},{n:"博学路",t:3260},{n:"市体育中心",t:3390},{n:"龙子湖",t:3520},{n:"文苑北路",t:3650},{n:"河南大学新区",t:3780}]},
+"2号线":{color:"#f59e0b",from:"贾河",to:"南四环(郑州航空港站)",firstTrain:360,lastTrain:1380,peakInterval:270,offpeakInterval:420,dwell:30,stations:[{n:"贾河",t:0},{n:"惠济区政府·市三院惠济院区",t:135},{n:"毛庄",t:260},{n:"黄河迎宾馆",tr:"7号线",tc:"#d4a574",t:385},{n:"金洼",t:510},{n:"金达路",t:635},{n:"刘庄",t:760},{n:"柳林",t:885},{n:"沙门",tr:"4号线",tc:"#3b82f6",t:1010},{n:"北三环",t:1135},{n:"东风路",tr:"8号线",tc:"#84cc16",t:1260},{n:"关虎屯",t:1385},{n:"黄河路",tr:"5号线",tc:"#7c3aed",t:1510},{n:"紫荆山",tr:"1号线",tc:"#e8384f",t:1635},{n:"东大街·市第一人民医院",tr:"3号线",tc:"#22c55e",t:1760},{n:"陇海东路",t:1885},{n:"二里岗",tr:"6号线",tc:"#a855f7",t:2010},{n:"南五里堡",tr:"5号线",tc:"#7c3aed",t:2135},{n:"花寨",t:2260},{n:"南三环",t:2385},{n:"站马屯",t:2510},{n:"南四环(郑州航空港站)",tr:"城郊线",tc:"#10b981",t:2635}]},
+"3号线":{color:"#22c55e",from:"滨河新城南",to:"省体育中心",firstTrain:360,lastTrain:1395,peakInterval:300,offpeakInterval:420,dwell:30,stations:[{n:"滨河新城南",t:0},{n:"司赵·市七院滨河院区",t:130},{n:"滨河新城",t:260},{n:"潮河",t:390},{n:"营岗",t:520},{n:"圃田西",t:650},{n:"省骨科医院",tr:"5号线",tc:"#7c3aed",t:780},{n:"东周",t:910},{n:"西周",t:1040},{n:"通泰路",t:1170},{n:"东十里铺",tr:"4号线",tc:"#3b82f6",t:1300},{n:"凤凰台",t:1430},{n:"博览中心",t:1560},{n:"郑州文庙",t:1690},{n:"东大街·市第一人民医院",tr:"2号线",tc:"#f59e0b",t:1820},{n:"西大街",t:1950},{n:"二七广场",tr:"1号线",tc:"#e8384f",t:2080},{n:"人民公园",t:2210},{n:"大石桥·市妇幼保健院",t:2340},{n:"海滩寺",tr:"5号线",tc:"#7c3aed",t:2470},{n:"南阳新村",t:2600},{n:"同乐",tr:"8号线",tc:"#84cc16",t:2730},{n:"兴隆铺",t:2860},{n:"王砦",t:2990},{n:"省体育中心",t:3120}]},
+"城郊线":{color:"#10b981",from:"南四环(贾河)",to:"郑州航空港站",firstTrain:360,lastTrain:1320,peakInterval:360,offpeakInterval:480,dwell:30,stations:[{n:"南四环(贾河)",tr:"2号线",tc:"#f59e0b",t:0},{n:"十八里河",t:150},{n:"沙窝李",t:280},{n:"双湖大道",t:410},{n:"小乔",t:540},{n:"华南城西",t:670},{n:"华南城",t:800},{n:"华南城东",t:930},{n:"孟庄",t:1060},{n:"港区北",t:1190},{n:"康平湖",t:1320},{n:"兰河公园",t:1450},{n:"恩平湖",t:1580},{n:"综合保税区",t:1710},{n:"新郑机场",t:1840},{n:"3号航站楼",t:1970},{n:"机场东",t:2100},{n:"港区会展",t:2230},{n:"郑州航空港站",t:2360}]},
+"4号线":{color:"#3b82f6",from:"郎庄",to:"老鸦陈",firstTrain:360,lastTrain:1380,peakInterval:300,offpeakInterval:450,dwell:30,stations:[{n:"郎庄",t:0},{n:"姚庄",t:130},{n:"金岱",t:260},{n:"果树所",t:390},{n:"七里河",tr:"5号线",tc:"#7c3aed",t:520},{n:"货站街",t:650},{n:"东十里铺",tr:"3号线",tc:"#22c55e",t:780},{n:"商鼎路",t:910},{n:"会展中心",tr:"1号线",tc:"#e8384f",t:1040},{n:"中央商务区",tr:"5号线",tc:"#7c3aed",t:1170},{n:"农业东路",t:1300},{n:"龙湖中环南",tr:"8号线",tc:"#84cc16",t:1430},{n:"龙湖南",t:1560},{n:"金融岛南",t:1690},{n:"金融岛北",t:1820},{n:"龙湖北",t:1950},{n:"龙湖中环北",t:2080},{n:"清华附中",tr:"6号线",tc:"#a855f7",t:2210},{n:"森林公园北",t:2340},{n:"杨君刘",t:2470},{n:"沙门",tr:"2号线",tc:"#f59e0b",t:2600},{n:"陈寨东",t:2730},{n:"张家村",tr:"7号线",tc:"#d4a574",t:2860},{n:"丰庆路",t:2990},{n:"北二十里铺",t:3120},{n:"省体育中心",tr:"3号线",tc:"#22c55e",t:3250},{n:"老鸦陈",t:3380}]},
+"5号线":{color:"#7c3aed",from:"月季公园(环线)",to:"月季公园(环线)",firstTrain:360,lastTrain:1380,peakInterval:300,offpeakInterval:480,dwell:30,stations:[{n:"月季公园",tr:"1号线",tc:"#e8384f",t:0},{n:"沙口路",t:130},{n:"海滩寺",tr:"3号线",tc:"#22c55e",t:260},{n:"郑州人民医院",tr:"7号线",tc:"#d4a574",t:390},{n:"黄河路",tr:"2号线",tc:"#f59e0b",t:520},{n:"省人民医院",t:650},{n:"姚砦·聂庄",tr:"6号线",tc:"#a855f7",t:780},{n:"众意西路",t:910},{n:"中央商务区",tr:"4号线",tc:"#3b82f6",t:1040},{n:"儿童医院·颐和医院",t:1170},{n:"祭城",t:1300},{n:"金水东路",t:1430},{n:"郑州东站",tr:"1号线",tc:"#e8384f",t:1560},{n:"康宁街",t:1690},{n:"省骨科医院",tr:"3号线",tc:"#22c55e",t:1820},{n:"经北二路",t:1950},{n:"经开中心广场",t:2080},{n:"福塔东",t:2210},{n:"中原福塔",t:2340},{n:"七里河",tr:"4号线",tc:"#3b82f6",t:2470},{n:"航海广场",t:2600},{n:"城东南路",t:2730},{n:"南五里堡",tr:"2号线",tc:"#f59e0b",t:2860},{n:"冯庄",t:2990},{n:"京广南路·市第六人民医院",t:3120},{n:"市第二人民医院",tr:"7号线",tc:"#d4a574",t:3250},{n:"齐礼阎",t:3380},{n:"后河芦·市第八人民医院",t:3510},{n:"桐淮",tr:"6号线",tc:"#a855f7",t:3640},{n:"陇海西路",t:3770},{n:"市中心医院",tr:"10号线",tc:"#06b6d4",t:3900},{n:"五一公园·市中医院",tr:"1号线",tc:"#e8384f",t:4030},{n:"月季公园",tr:"1号线",tc:"#e8384f",t:4160}]},
+"6号线":{color:"#a855f7",from:"贾峪",to:"清华附中",firstTrain:360,lastTrain:1380,peakInterval:330,offpeakInterval:480,dwell:30,stations:[{n:"贾峪",t:0},{n:"洞林湖",t:140},{n:"洞林寺",t:270},{n:"安宁路",t:400},{n:"马寨",t:530},{n:"河南建院",t:660},{n:"金桢路",t:790},{n:"奥体中心西",t:920},{n:"奥体中心",tr:"14号线",tc:"#a78bfa",t:1050},{n:"常庄",t:1180},{n:"冯湾",t:1310},{n:"李江沟",t:1440},{n:"卧龙岗",t:1570},{n:"桐淮",tr:"5号线",tc:"#7c3aed",t:1700},{n:"嵩淮",t:1830},{n:"大学中路",tr:"7号线",tc:"#d4a574",t:1960},{n:"火车头体育场",t:2090},{n:"陇秀公园",t:2220},{n:"二里岗",tr:"2号线",tc:"#f59e0b",t:2350},{n:"二里岗东",t:2480},{n:"凤凰台南",t:2610},{n:"博览中心",tr:"3号线",tc:"#22c55e",t:2740},{n:"燕庄",tr:"1号线",tc:"#e8384f",t:2870},{n:"姚砦·聂庄",tr:"5号线",tc:"#7c3aed",t:3000},{n:"金汇桥",t:3130},{n:"小营",tr:"8号线",tc:"#84cc16",t:3260},{n:"金融岛西",t:3390},{n:"清华附中",tr:"4号线",tc:"#3b82f6",t:3520}]},
+"7号线":{color:"#d4a574",from:"黄河博览馆",to:"南岗刘",firstTrain:360,lastTrain:1380,peakInterval:330,offpeakInterval:480,dwell:30,stations:[{n:"黄河博览馆",t:0},{n:"东赵",t:140},{n:"黄河迎宾馆",tr:"2号线",tc:"#f59e0b",t:270},{n:"北大学城",t:400},{n:"琉璃寺",t:530},{n:"张家村",tr:"4号线",tc:"#3b82f6",t:660},{n:"陈砦",t:790},{n:"白庙",tr:"8号线",tc:"#84cc16",t:920},{n:"农业大学",t:1050},{n:"郑州人民医院",tr:"5号线",tc:"#7c3aed",t:1180},{n:"大石桥·市妇幼保健院",tr:"3号线",tc:"#22c55e",t:1310},{n:"郑大一附院",t:1440},{n:"医学院",tr:"1号线",tc:"#e8384f",t:1570},{n:"市骨科医院",t:1700},{n:"大学中路",tr:"6号线",tc:"#a855f7",t:1830},{n:"市第二人民医院",tr:"5号线",tc:"#7c3aed",t:1960},{n:"王胡砦",t:2090},{n:"漓江路",t:2220},{n:"荆胡",t:2350},{n:"南环公园",t:2480},{n:"南岗刘",t:2610}]},
+"8号线":{color:"#84cc16",from:"天健湖",to:"鲁庙",firstTrain:360,lastTrain:1380,peakInterval:300,offpeakInterval:420,dwell:30,stations:[{n:"天健湖",t:0},{n:"轻工业大学",t:130},{n:"祥营",t:260},{n:"郑州大学",tr:"1号线",tc:"#e8384f",t:390},{n:"银屏路",t:520},{n:"冬青街",t:650},{n:"南流",t:780},{n:"大学科技园",t:910},{n:"五龙口",t:1040},{n:"同乐",tr:"3号线",tc:"#22c55e",t:1170},{n:"省中医院",t:1300},{n:"白庙",tr:"7号线",tc:"#d4a574",t:1430},{n:"东风路",tr:"2号线",tc:"#f59e0b",t:1560},{n:"枣庄",t:1690},{n:"小营",tr:"6号线",tc:"#a855f7",t:1820},{n:"龙湖中环南",tr:"4号线",tc:"#3b82f6",t:1950},{n:"郑大一附院东区",t:2080},{n:"高铁公园",t:2210},{n:"畅和街",t:2340},{n:"郑州东站",tr:"5号线",tc:"#7c3aed",t:2470},{n:"圃田西",tr:"3号线",tc:"#22c55e",t:2600},{n:"圃田",t:2730},{n:"省社科院",t:2860},{n:"福泽路",t:2990},{n:"李湖桥",t:3120},{n:"龙王庙",t:3250},{n:"绿博园",t:3380},{n:"鲁庙",t:3510}]},
+"10号线":{color:"#06b6d4",from:"郑州火车站",to:"郑州西站",firstTrain:360,lastTrain:1380,peakInterval:360,offpeakInterval:540,dwell:30,stations:[{n:"郑州火车站",tr:"1号线",tc:"#e8384f",t:0},{n:"医学院",tr:"7号线",tc:"#d4a574",t:140},{n:"绿城广场",tr:"1号线",tc:"#e8384f",t:270},{n:"市中心医院",tr:"5号线",tc:"#7c3aed",t:400},{n:"二砂",t:530},{n:"西流湖公园南",t:660},{n:"郑州一中",t:790},{n:"市委党校",tr:"14号线",tc:"#a78bfa",t:920},{n:"柳湖",t:1050},{n:"庙王",t:1180},{n:"李商隐公园",t:1310},{n:"郑州西站",t:1440}]},
+"14号线":{color:"#a78bfa",from:"须水",to:"莲湖",firstTrain:360,lastTrain:1380,peakInterval:420,offpeakInterval:600,dwell:30,stations:[{n:"须水",t:0},{n:"铁炉",tr:"1号线",tc:"#e8384f",t:140},{n:"市民大道",t:270},{n:"市委党校",tr:"10号线",tc:"#06b6d4",t:400},{n:"奥体中心",tr:"6号线",tc:"#a855f7",t:530},{n:"莲湖",t:660}]}
+};const LINE_CUM={};Object.keys(LINES).forEach(k=>{const d=LINES[k],c=[0];for(let i=1;i<d.stations.length;i++)c.push(c[i-1]+(d.stations[i].t-d.stations[i-1].t)+d.dwell);LINE_CUM[k]=c});
+function hexRGB(h){const m=h.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);return m?parseInt(m[1],16)+','+parseInt(m[2],16)+','+parseInt(m[3],16):'200,200,200'}
+function singleGrad(r){return'linear-gradient(135deg,rgba('+r+',.08),rgba('+r+',.03))'}
+function transferGrad(r1,r2){return'linear-gradient(135deg,rgba('+r1+',.08),rgba('+r2+',.04))'}
+function fmt(s){s=Math.max(0,Math.ceil(s));if(s>=3600)return Math.floor(s/3600)+'h'+Math.floor((s%3600)/60)+'m';if(s>=60)return Math.floor(s/60)+'分'+s%60+'s';return s+'s'}
+function timeColor(s){if(s<=150)return'#fbbf24';return'#e4e8f0'}
+function badgeContent(name){
+  var m=name.match(/^(\d+)(.+)$/);
+  if(m){var h='<span>'+m[1]+'</span>';for(var i=0;i<m[2].length;i++)h+='<span>'+m[2][i]+'</span>';return h}
+  return'<span>'+name+'</span>';
+}
+class Engine{
+  constructor(n){this.name=n;this.data=LINES[n];this.cum=LINE_CUM[n];this.totalCycle=this.cum[this.cum.length-1]}
+  predict(nowSec){const d=this.data,res=[];const isOp=nowSec>=d.firstTrain*60&&nowSec<=d.lastTrain*60+this.totalCycle;const intv=this.getIntv(nowSec,d);let inTransit=0;const adjNow=nowSec-TIME_OFFSET;for(let t0=d.firstTrain*60;t0<=d.lastTrain*60;t0+=intv){if(t0<=adjNow&&t0+this.totalCycle>adjNow)inTransit++}for(let i=0;i<d.stations.length;i++){const arr=[],at=this.cum[i];for(let t0=d.firstTrain*60;t0<=d.lastTrain*60;t0+=intv){const diff=t0+at-nowSec+TIME_OFFSET;if(diff>-d.dwell&&diff<3600)arr.push({s:diff})}arr.sort((a,b)=>a.s-b.s);res.push(arr)}return{a:res,op:isOp,c:inTransit||(isOp?1:0)}}
+  getIntv(nowSec,d){const m=nowSec/60;return((m>=420&&m<=540)||(m>=1020&&m<=1140))?d.peakInterval:d.offpeakInterval}
+}
+function getTransferBoth(tr,sn,nowSec){const td=LINES[tr];if(!td)return{op:false,from:'',to:''};const tc=LINE_CUM[tr],si=td.stations.findIndex(s=>s.n===sn);if(si<0)return{op:false,from:td.from,to:td.to};const isOp=nowSec>=td.firstTrain*60&&nowSec<=td.lastTrain*60+tc[tc.length-1];if(!isOp)return{op:false,to:td.from===td.to?'环线':td.to,from:td.from===td.to?'环线':td.from};const m=nowSec/60,iv=((m>=420&&m<=540)||(m>=1020&&m<=1140))?td.peakInterval:td.offpeakInterval;const at=tc[si];let d1=null,d2=null;for(let t0=td.firstTrain*60;t0<=td.lastTrain*60;t0+=iv){const df=t0+at-nowSec+TIME_OFFSET;if(df>-td.dwell){if(d1===null)d1=df;else if(d2===null){d2=df;break}}}const fl=td.from===td.to?'内环':td.from,tl=td.from===td.to?'外环':td.to;return{op:true,to:tl,from:fl,d1,d2}}
+let curLine='1号线',engine=new Engine(curLine),lastSec=-1,reverseDir=false,TIME_OFFSET=getOffset();setTimeout(function(){if(AMAP_KEY){syncGaode()}else{var me=document.getElementById('meta');me.textContent='⚡ 点此设置高德Key';me.style.cursor='pointer';me.onclick=function(){var k=prompt('输入高德开放平台 Web API Key：\n(获取：console.amap.com)');if(k){localStorage.setItem('amap_key',k);AMAP_KEY=k;location.reload()}}}},1000);function toggleDirection(){reverseDir=!reverseDir;const card=document.getElementById('stationCard');card.style.opacity='0';setTimeout(()=>{buildStations();updateDir();card.style.opacity='1';window.scrollTo({top:0,behavior:'smooth'})},200)}function getOffset(){var v=parseInt(localStorage.getItem('mfe_offset'));if(isNaN(v)||v>600||v<-600){v=-150;localStorage.removeItem('mfe_offset')}return v}function setOffset(v){localStorage.setItem('mfe_offset',v);TIME_OFFSET=v;var ce=document.getElementById('calibVal');if(ce)ce.textContent=(v>=0?'+':'')+v+'s';var cs=document.getElementById('calibSlider');if(cs)cs.value=v}function adjOffset(d){setOffset(getOffset()+d)}
+function renderTabs(){document.getElementById('lineTabs').innerHTML=Object.keys(LINES).map(name=>{const d=LINES[name];return'<div class="tab '+(name===curLine?'active':'')+'" style="'+(name===curLine?'background:'+d.color+'22;color:'+d.color+';border-color:'+d.color+'33':'')+'" onclick="switchLine(\''+name+'\')"><span class="dot" style="background:'+d.color+'"></span>'+name+'</div>'}).join('')}
+function updateDir(){const d=LINES[curLine];const rf=reverseDir?d.to:d.from;const rt=reverseDir?d.from:d.to;const bar=document.getElementById('dirBar');bar.innerHTML='<div class="dir-content"><span class="dir-from">'+rf+'</span><span class="dir-arrow">→</span><span class="dir-to">'+rt+'</span></div><span class="dir-tag">'+d.stations.length+'站</span>';bar.onclick=toggleDirection;bar.style.cursor='pointer'}
+function ft(t){if(t===null)return{text:'暂无班次',color:'#3e4f6a'};if(t<1)return{text:'进站中',color:'#fbbf24'};return{text:fmt(t)+'后到达',color:timeColor(t)||'#7b8ba4'}}
+function mkBadge(s){return'<span class="tr-badge" style="background:'+s.tc+'18;color:'+s.tc+';border:1px solid '+s.tc+'33">'+badgeContent(s.tr)+'</span>'}
+function buildStations(){const now=new Date(),nowSec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();const pred=engine.predict(nowSec),d=LINES[curLine];const stations=reverseDir?[...d.stations].reverse():d.stations;const predA=reverseDir?[...pred.a].reverse():pred.a,curR=hexRGB(d.color);document.getElementById('offlineBanner').style.display=pred.op?'none':'block';document.getElementById('meta').textContent=pred.op?pred.c+' 列在途':'非运营时段';let html='';for(let i=0;i<stations.length;i++){const s=stations[i],arr=predA[i],hasTr=!!s.tr,trR=hasTr?hexRGB(s.tc):null;let trHtml='';if(hasTr){const trD=getTransferBoth(s.tr,s.n,nowSec),bd=mkBadge(s);if(!trD.op){trHtml='<div class="tr-group"><div class="tr-badge-col">'+bd+'</div><div class="tr-rows-col"><div class="tr-info-row"><span class="tr-arrow">→</span><span class="tr-dir">'+trD.from+'</span><span class="tr-time" style="color:#3e4f6a">非运营</span></div></div></div>'}else{const t1=ft(trD.d2),t2=ft(trD.d1);let isCirc=hasTr&&LINES[s.tr]&&LINES[s.tr].from===LINES[s.tr].to;trHtml='<div class="tr-group"><div class="tr-badge-col">'+bd+'</div><div class="tr-rows-col"><div class="tr-info-row"><span class="tr-arrow">→</span><span class="tr-dir">'+(isCirc?'近班':trD.from)+'</span><span class="tr-time" style="color:'+t1.color+'">'+t1.text+'</span></div>'+(isCirc?'<div class="tr-info-row"><span class="tr-arrow">→</span><span class="tr-dir">后班</span><span class="tr-time" style="color:'+t2.color+'">'+t2.text+'</span></div>':'<div class="tr-info-row"><span class="tr-arrow">→</span><span class="tr-dir">'+trD.to+'</span><span class="tr-time" style="color:'+t2.color+'">'+t2.text+'</span></div>')+'</div></div>'}}let sc='',rs='',dc='',to=1,mt='--',mu='',mc='#7b8ba4',uc='#3e4f6a',nt='',tx='';if(!arr||arr.length===0){sc='row-passed';dc='dot-passed';to=.35}else{const first=arr[0],sec=Math.max(0,Math.ceil(first.s));if(first.s<=0&&first.s>-engine.data.dwell){sc='row-dwell';dc='dot-dwell';if(trR)rs='background:'+transferGrad(trR,'251,191,36')+';border:1px solid rgba('+trR+',.12)';else rs='background:'+singleGrad('251,191,36')+';border:1px solid rgba(251,191,36,.2)';mt='停靠中';mu='';mc='#fbbf24';uc='#fbbf24';tx=''}else if(sec>0&&sec<=30){sc='row-arriving';dc='dot-arriving';if(trR)rs='background:'+transferGrad(trR,curR)+';border:1px solid rgba('+trR+',.12)';else rs='background:'+singleGrad(curR)+';border:1px solid rgba('+curR+',.2)';mt=fmt(sec);mu='到达';mc='#e8384f';uc='#e8384f';tx='即将到站'}else{mt=fmt(sec);mu='到达';mc=timeColor(sec);uc='#3e4f6a';tx=''}if(arr.length>1&&arr[1].s>0)nt=fmt(arr[1].s)}const ut=mu?'<span class="t-unit" style="color:'+uc+'">'+mu+'</span>':'',nx=nt?'<span class="t-next">下一班 '+nt+'</span>':'',sx=tx?'<div class="t-hint">'+tx+'</div>':'';html+='<div class="row '+(hasTr?'row-has-tr ':'')+sc+'" style="'+rs+';animation-delay:'+i*40+'ms"><div class="dot-col"><div class="dot '+dc+'"></div></div><div class="name-col"><div class="name-line"><span class="st-name">'+s.n+'</span></div>'+trHtml+'</div><div class="times-col" style="opacity:'+to+'"><div class="t-main"><span class="t-val" style="color:'+mc+'">'+mt+'</span>'+ut+'</div>'+sx+nx+'</div></div>'}document.getElementById('stationCard').innerHTML=html}
+var AMAP_KEY=localStorage.getItem('amap_key')||'61c201b7cbf1acc2931f6369bb15d9e1';
+var GAODE_SYNCED=false;
+function syncGaode(){if(!AMAP_KEY)return;var d=LINES[curLine];if(d.from===d.to)return;var rf=reverseDir?d.to:d.from;var rt=reverseDir?d.from:d.to;var url='https://restapi.amap.com/v3/direction/transit/integrated?origin='+encodeURIComponent(rf)+'&destination='+encodeURIComponent(rt)+'&city=0371&key='+AMAP_KEY;fetch(url).then(function(r){return r.json()}).then(function(data){if(data.status!=='1')return;var gaodeTotal=0;data.route.transits.forEach(function(t){t.segments.forEach(function(s){if(s.bus&&s.bus.buslines){s.bus.buslines.forEach(function(bl){if(bl.type&&bl.type.indexOf('地铁')>-1){gaodeTotal+=parseInt(bl.duration)}})}})});if(!gaodeTotal)return;var cum=LINE_CUM[curLine];var localTravel=0;for(var i=1;i<d.stations.length;i++){localTravel+=(d.stations[i].t-d.stations[i-1].t)}var diff=gaodeTotal-localTravel;var adj=Math.round(diff*0.5);adj=Math.max(-180,Math.min(180,adj));var changed=adj!==TIME_OFFSET;if(changed){TIME_OFFSET=adj;localStorage.setItem('mfe_offset',TIME_OFFSET);engine=new Engine(curLine)}if(changed||!GAODE_SYNCED){if(!GAODE_SYNCED){GAODE_SYNCED=true;var me=document.getElementById('meta');if(me)me.textContent='已校准'}buildStations()}}).catch(function(){})}setInterval(syncGaode,1000);setTimeout(syncGaode,500);function tick(){const now=new Date(),sec=now.getSeconds();if(sec!==lastSec){lastSec=sec;var ts=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');document.getElementById('clock').textContent=ts;var c2=document.getElementById('clock2');if(c2)c2.textContent=ts;updateTick()}setTimeout(tick,Math.max(10,1010-now.getMilliseconds()))}
+function updateTick(){const now=new Date(),nowSec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();const pred=engine.predict(nowSec),d=LINES[curLine];const stations=reverseDir?[...d.stations].reverse():d.stations;const predA=reverseDir?[...pred.a].reverse():pred.a;document.getElementById('meta').textContent=pred.op?pred.c+' 列在途':'非运营时段';document.getElementById('offlineBanner').style.display=pred.op?'none':'block';const rows=document.querySelectorAll('#stationCard .row');for(let i=0;i<stations.length&&i<rows.length;i++){const s=stations[i],arr=predA[i];if(s.tr){const trD=getTransferBoth(s.tr,s.n,nowSec);const ta=rows[i].querySelectorAll('.tr-time');if(ta.length>=2){if(!trD.op){ta[0].textContent='非运营';ta[0].style.color='#3e4f6a';ta[1].textContent='非运营';ta[1].style.color='#3e4f6a'}else{if(trD.d2!==null){ta[0].textContent=fmt(trD.d2)+'后到达';ta[0].style.color=timeColor(trD.d2)||'#7b8ba4'}else{ta[0].textContent='暂无班次';ta[0].style.color='#3e4f6a'}if(trD.d1!==null){ta[1].textContent=fmt(trD.d1)+'后到达';ta[1].style.color=timeColor(trD.d1)||'#7b8ba4'}else{ta[1].textContent='暂无班次';ta[1].style.color='#3e4f6a'}}}}const vE=rows[i].querySelector('.t-val'),uE=rows[i].querySelector('.t-unit'),nE=rows[i].querySelector('.t-next'),sE=rows[i].querySelector('.t-hint');if(!arr||arr.length===0){if(vE)vE.textContent='--';if(sE)sE.remove();continue}const first=arr[0],sec=Math.max(0,Math.ceil(first.s));if(first.s<=0&&first.s>-engine.data.dwell){if(vE){vE.textContent='停靠中';vE.style.color='#fbbf24'}if(uE)uE.textContent='';if(sE)sE.remove()}else if(sec>0&&sec<=30){if(vE){vE.textContent=fmt(sec);vE.style.color='#e8384f'}if(!uE){var nsu=document.createElement('span');nsu.className='t-unit';nsu.style.cssText='font-size:10px;line-height:1';vE.parentNode.appendChild(nsu);uE=nsu}uE.textContent='到达';uE.style.color='#e8384f';if(!sE){var ns=document.createElement('div');ns.className='t-hint';ns.style.cssText='font-size:11px;color:#e8384f;font-weight:600;text-align:right;margin-top:2px';var tc=rows[i].querySelector('.times-col');if(tc){var nn=tc.querySelector('.t-next');if(nn)tc.insertBefore(ns,nn);else tc.appendChild(ns)}sE=ns}if(sE)sE.textContent='即将到站'}else{if(vE){vE.textContent=fmt(sec);vE.style.color=timeColor(sec)}if(!uE){var nsu2=document.createElement('span');nsu2.className='t-unit';nsu2.style.cssText='font-size:10px;line-height:1';vE.parentNode.appendChild(nsu2);uE=nsu2}uE.textContent='到达';uE.style.color='#3e4f6a'if(sE)sE.remove()}if(nE&&arr.length>1&&arr[1].s>0)nE.textContent='下一班 '+fmt(arr[1].s)}}
+function switchLine(name){if(name===curLine)return;const card=document.getElementById('stationCard');card.style.opacity='0';setTimeout(()=>{curLine=name;reverseDir=false;engine=new Engine(curLine);renderTabs();updateDir();buildStations();card.style.opacity='1';window.scrollTo({top:0,behavior:'smooth'})},200)}
+function switchTab(tab){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.sub-page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+tab).classList.add('active');var idx=tab==='metro'?0:tab==='notif-main'?1:2;document.querySelectorAll('.tab-item')[idx].classList.add('active')}
+function showSubPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+name).classList.add('active')}
+function goBack(){document.querySelectorAll('.sub-page').forEach(p=>p.classList.remove('active'));document.getElementById('page-me').classList.add('active');document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-item')[2].classList.add('active')}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+function submitBug(){
+  var tp=document.getElementById('bugType').value;
+  var ln=document.getElementById('bugLine').value;
+  var ds=document.getElementById('bugDesc').value;
+  var ct=document.getElementById('bugContact').value;
+  var subj=encodeURIComponent('[郑州地铁App反馈] '+tp+' - '+ln);
+  var body=encodeURIComponent('反馈类型：'+tp+'\n涉及线路：'+ln+'\n问题描述：'+ds+'\n联系方式：'+ct+'\n\n---\n自动发送自 郑州地铁实时到站');
+  window.location.href='mailto:840892116@qq.com?subject='+subj+'&body='+body;
+  showToast('正在打开邮件客户端...');
+}
+// 通知系统
+var NOTIFS=[
+  {tag:'新线开通',bg:'rgba(56,189,248,.12)',color:'#38bdf8',title:'7号线正式开通运营',desc:'郑州地铁7号线（东赵—南岗刘）于2024年12月29日正式开通运营，设站16座，可与1/2/3/5号线换乘。',time:'2024-12-29'},
+  {tag:'新线开通',bg:'rgba(56,189,248,.12)',color:'#38bdf8',title:'8号线正式开通运营',desc:'郑州地铁8号线（天健湖—鲁庙）于2024年12月29日正式开通运营，设站28座，可与1/2/3/5/6号线换乘。',time:'2024-12-29'},
+  {tag:'运营公告',bg:'rgba(232,56,79,.12)',color:'#e8384f',title:'元旦假期延时运营',desc:'为保障元旦假期乘客出行，各线路末班车延长运营30分钟。',time:'2025-01-01'},
+  {tag:'运营公告',bg:'rgba(232,56,79,.12)',color:'#e8384f',title:'1号线西三环站恢复运营',desc:'1号线西三环站站台改造施工已完成，即日起恢复正常运营。',time:'2025-03-15'},
+  {tag:'运营调整',bg:'rgba(251,191,36,.12)',color:'#fbbf24',title:'五一假期运营安排',desc:'五一期间（5月1日-5日）郑州地铁全线网延长运营时间，首班车提前、末班车推迟30分钟。',time:'2025-04-28'},
+  {tag:'运营调整',bg:'rgba(251,191,36,.12)',color:'#fbbf24',title:'6号线一期全线贯通',desc:'6号线一期贾峪站至清华附中站全线贯通运营，设站28座。',time:'2024-11-30'},
+  {tag:'官方公告',bg:'rgba(167,139,250,.12)',color:'#a78bfa',title:'郑州地铁三期规划获批',desc:'第三期建设规划获批，新增7号线、8号线、12号线等线路。',time:'2024-10-15'},
+  {tag:'安全提示',bg:'rgba(239,68,68,.12)',color:'#ef4444',title:'地铁安检温馨提示',desc:'提醒广大乘客配合安检工作，严禁携带易燃易爆等危险品进站乘车。',time:'2024-08-20'}
+];
+function fetchNotifs(){
+  var h='';
+  NOTIFS.forEach(function(n){
+    h+='<div class="notif-card"><span class="n-tag" style="background:'+n.bg+';color:'+n.color+'">'+n.tag+'</span><div class="n-title">'+n.title+'</div><div class="n-desc">'+n.desc+'</div><div class="n-time">'+n.time+'</div></div>';
+  });
+  document.getElementById('notifContent').innerHTML=h;
+}
+fetchNotifs();
+
+renderTabs();updateDir();buildStations();tick();setTimeout(function(){var ce=document.getElementById("calibVal");if(ce)ce.textContent=(getOffset()>=0?"+":"")+getOffset()+"s";var cs=document.getElementById("calibSlider");if(cs)cs.value=getOffset()},100);
+</script>
+</body>
+</html>
+
