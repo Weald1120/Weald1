@@ -554,50 +554,51 @@ function updateTrainMarker(pred){
   const rows=card.querySelectorAll('.row');
   if(!rows.length){marker.classList.remove('show','yellow','red','pulse');return}
 
-  // 只找"即将进站"的列车（两站之间移动中）：0 < s ≤ 150
-  // 停靠中的站由 CSS .row-dwell 独立显示框，不占用 marker
+  // 找"同一辆车"所在位置：
+  // 从第一站往最后一站遍历，找到 s 在 0~150 的站
+  // 同时验证上一站的 s 是负数（列车刚离开），确保是同一辆车
   let activeIdx=-1, activeS=999;
   for(let i=0;i<pred.order.length;i++){
     const arr=pred.a[i];
     if(!arr||!arr.length)continue;
     const s=arr[0].s;
-    // 只选"移动中"的列车（已出发但尚未到站）
     if(s>0&&s<=150&&s<activeS){activeIdx=i;activeS=s}
   }
 
   if(activeIdx<0){
-    // 没有移动中的列车 → 隐藏浮动框
     marker.classList.remove('show','yellow','red','pulse');
     return;
   }
 
   const cardRect=card.getBoundingClientRect();
-  const activeRow=rows[activeIdx];
-  const activeRect=activeRow.getBoundingClientRect();
+  const activeRect=rows[activeIdx].getBoundingClientRect();
   const isArriving=(activeS>0&&activeS<=30);
 
-  // 框覆盖上一站（列车刚离开的站）+ 本站（即将到达的站）
+  // 关键修复：检查上一站是否是同一辆车刚离开（s 为负数）
   const prevIdx=activeIdx-1;
+  let spanTwo=false;
   if(prevIdx>=0){
-    const prevRect=rows[prevIdx].getBoundingClientRect();
-    const spanTop=Math.min(prevRect.top,activeRect.top)-cardRect.top-2;
-    const spanBottom=Math.max(prevRect.bottom,activeRect.bottom)-cardRect.top+2;
-    marker.style.top=spanTop+'px';
-    marker.style.height=(spanBottom-spanTop)+'px';
-    if(isArriving){
-      marker.className='train-marker show red';
-    }else{
-      marker.className='train-marker show yellow';
+    const prevArr=pred.a[prevIdx];
+    if(prevArr&&prevArr.length&&prevArr[0].s<0&&prevArr[0].s>-300){
+      // 上一站的 s 是负数 → 同一辆车刚从那站离开 → 连框两站
+      spanTwo=true;
+      const prevRect=rows[prevIdx].getBoundingClientRect();
+      const spanTop=Math.min(prevRect.top,activeRect.top)-cardRect.top-2;
+      const spanBottom=Math.max(prevRect.bottom,activeRect.bottom)-cardRect.top+2;
+      marker.style.top=spanTop+'px';
+      marker.style.height=(spanBottom-spanTop)+'px';
     }
-  }else{
-    // 首站，框只覆盖本站
+  }
+  if(!spanTwo){
+    // 不同车辆或首站，框只覆盖本站
     marker.style.top=(activeRect.top-cardRect.top-2)+'px';
     marker.style.height=(activeRect.height+4)+'px';
-    if(isArriving){
-      marker.className='train-marker show red';
-    }else{
-      marker.className='train-marker show yellow';
-    }
+  }
+
+  if(isArriving){
+    marker.className='train-marker show red';
+  }else{
+    marker.className='train-marker show yellow';
   }
 }
 
