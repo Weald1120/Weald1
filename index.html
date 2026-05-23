@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>郑州地铁 · 实时到站</title>
+<title>閮戝窞鍦伴搧 路 瀹炴椂鍒扮珯</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -25,6 +25,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','
 .live{font-size:11px;color:var(--red);font-weight:600;display:inline-flex;align-items:center;gap:5px}
 .live::before{content:'';width:8px;height:8px;border-radius:50%;border:2px solid var(--red);border-top-color:transparent;animation:spinner .8s linear infinite;display:inline-block}
 @keyframes spinner{to{transform:rotate(360deg)}}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.4}}
 .tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:8px 0 6px}
 .tabs-wrap::-webkit-scrollbar{display:none}
 .tabs{display:inline-flex;gap:6px;padding:0 20px;white-space:nowrap}
@@ -37,76 +38,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','
 .offline-banner{margin:10px 20px 0;padding:10px 16px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.12);border-radius:12px;font-size:12px;color:var(--amber)}
 .sec{padding:12px 20px 0}.sec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .sec-t{font-size:12px;font-weight:600;color:var(--muted)}.sec-m{font-size:11px;color:var(--dim)}
-.card{background:var(--surface);border-radius:16px;border:1px solid var(--border);overflow:hidden;padding:4px 0;position:relative;transition:opacity .25s}
+.card{background:var(--surface);border-radius:16px;border:1px solid var(--border);overflow:hidden;padding:4px 0;transition:opacity .25s}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── 站点行基础样式 ── */
-.row{padding:6px 16px;margin:2px 8px;border-radius:12px;display:flex;align-items:flex-start;gap:10px;opacity:1;animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both;transition:background .35s,border-color .35s,box-shadow .35s}
-
-/* ── 列车位置浮动大框 ── */
-.train-marker{
-  position:absolute;left:4px;right:4px;
-  border-radius:14px;border:1px solid transparent;
-  pointer-events:none;z-index:2;
-  opacity:0;
-  transition:top .55s cubic-bezier(.25,.1,.25,1),
-             height .55s cubic-bezier(.25,.1,.25,1),
-             border-color .4s,box-shadow .4s,opacity .2s;
-}
-.train-marker.show{
-  opacity:1;
-}
-.train-marker.yellow{
-  border-color:rgba(251,191,36,.32);
-  box-shadow:0 0 0 1px rgba(251,191,36,.18),0 2px 14px rgba(251,191,36,.06);
-  background:rgba(251,191,36,.035);
-}
-.train-marker.red{
-  border-color:rgba(232,56,79,.45);
-  box-shadow:0 0 0 1px rgba(232,56,79,.28),0 2px 18px rgba(232,56,79,.1);
-  background:rgba(232,56,79,.04);
-}
-.train-marker.pulse{
-  animation:markerPulse 1.6s ease-in-out infinite;
-}
-@keyframes markerPulse{
-  0%,100%{box-shadow:0 0 0 1px rgba(251,191,36,.18),0 2px 14px rgba(251,191,36,.06)}
-  50%{box-shadow:0 0 0 2px rgba(251,191,36,.32),0 4px 20px rgba(251,191,36,.12)}
-}
-
-/* ── 状态行：停靠中时有独立黄框 ── */
-.row-dwell{
-  background:rgba(251,191,36,.04);
-  box-shadow:0 0 0 1px rgba(251,191,36,.32),0 2px 10px rgba(251,191,36,.08);
-}
-.row-arriving{background:rgba(232,56,79,.04)}
-.row-soon{background:rgba(251,191,36,.03)}
-
-/* ── 状态：已过站 ── */
-.row-passed .st-name{color:var(--dim)}.row-passed .times-col{opacity:.35}
-.row-has-tr{min-height:68px}
-
-/* ── dot 样式 ── */
+.row{padding:6px 16px;margin:2px 8px;border-radius:12px;display:flex;align-items:flex-start;gap:10px;opacity:1;animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both}
 .dot-col{flex-shrink:0;width:10px;padding-top:6px}
-.dot{width:10px;height:10px;border-radius:50%;border:2px solid rgba(232,56,79,.4);background:transparent;transition:all .3s;position:relative}
+.dot{width:10px;height:10px;border-radius:50%;border:2px solid rgba(232,56,79,.4);background:transparent;transition:all .3s}
 .dot-passed{background:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(232,56,79,.3)}
-.dot-dwell{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,.35);width:11px;height:11px;animation:dotPulse 1.6s ease-in-out infinite}
-.dot-dwell span{position:absolute;inset:-4px;border:2px solid var(--amber);border-radius:50%;animation:wave-expand 1.6s ease-out infinite;opacity:0}
-.dot-arriving{background:var(--red);border-color:var(--red);box-shadow:0 0 10px rgba(232,56,79,.3)}
+.dot-dwell{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,.35);width:11px;height:11px;animation:dotPulse 1.6s ease-in-out infinite}.dot-dwell span{position:absolute;inset:-4px;border:2px solid var(--amber);border-radius:50%;animation:wave-expand 1.6s ease-out infinite;opacity:0}
+.dot-arriving{background:var(--red);border-color:var(--red);box-shadow:0 0 10px rgba(232,56,79,.3);position:relative}
 .dot-arriving span{position:absolute;inset:-4px;border:2px solid var(--red);border-radius:50%;animation:wave-expand 1.6s ease-out infinite;opacity:0}
 .dot-arriving span:nth-child(2){animation-delay:.4s}
 .dot-arriving span:nth-child(3){animation-delay:.8s}
-/* 快到站：dot 加黄色晕 */
-.dot-soon{border-color:var(--amber);box-shadow:0 0 6px rgba(251,191,36,.4)}
 @keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 @keyframes wave-expand{0%{transform:scale(.3);opacity:.8}to{transform:scale(1.6);opacity:0}}
-
 .name-col{flex:1;min-width:0}.name-line{display:flex;align-items:center;gap:6px;line-height:1.4}
 .st-name{font-size:15px;font-weight:600;color:var(--text)}
 .times-col{flex-shrink:0;text-align:right;min-width:100px}.t-main{display:flex;align-items:baseline;gap:3px;justify-content:flex-end}
 .t-val{font-size:14px;font-weight:600;line-height:1;font-family:'DM Mono',monospace}.t-unit{font-size:10px;line-height:1}
-.t-next{font-size:10px;color:var(--dim);margin-top:1px}.t-hint{font-size:11px;font-weight:600;text-align:right;margin-top:2px}
-/* 换乘信息 */
+.t-next{font-size:10px;color:var(--dim);margin-top:1px}.t-hint{font-size:11px;color:#e8384f;font-weight:600;text-align:right;margin-top:2px}
+.row-passed .st-name{color:var(--dim)}.row-passed .times-col{opacity:.35}.row-has-tr{min-height:68px}
 .tr-group{margin-top:6px;display:flex;gap:8px}.tr-badge-col{flex-shrink:0;display:flex}
 .tr-badge{font-size:9px;font-weight:700;padding:4px 3px;border-radius:4px;white-space:nowrap;line-height:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
 .tr-rows-col{display:flex;flex-direction:column;gap:6px;flex:1;justify-content:center}
@@ -114,8 +64,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','
 .tr-arrow{font-size:10px;color:var(--dim);flex-shrink:0}
 .tr-dir{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
 .tr-time{font-size:11px;font-weight:600;white-space:nowrap}
-
-/* 其余页面样式保持不变 */
 .profile-header{text-align:center;padding:30px 20px 20px}
 .avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--red),#b01e33);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:28px}
 .profile-name{font-size:18px;font-weight:700}.profile-sub{font-size:12px;color:var(--muted);margin-top:4px}
@@ -170,770 +118,126 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans SC','
 <body>
 <div id="page-metro" class="page active">
   <div class="status-bar"><span class="clock" id="clock">--:--:--</span></div>
-  <div class="header"><h1>郑州地铁</h1><span class="live">LIVE</span></div>
+  <div class="header"><h1>閮戝窞鍦伴搧</h1><span class="live">LIVE</span></div>
   <div class="tabs-wrap"><div class="tabs" id="lineTabs"></div></div>
   <div class="dir-bar" id="dirBar"></div>
-  <div id="offlineBanner" class="offline-banner" style="display:none">当前非运营时段，显示首班车预估</div>
+  <div id="offlineBanner" class="offline-banner" style="display:none">褰撳墠闈炶繍钀ユ椂娈碉紝鏄剧ず棣栫彮杞﹂浼?/div>
   <div class="sec">
-    <div class="sec-h"><span class="sec-t">实时到站</span><span class="sec-m" id="meta">--</span></div>
-    <div class="card" id="stationCard"><div class="train-marker" id="trainMarker"></div></div>
+    <div class="sec-h"><span class="sec-t">瀹炴椂鍒扮珯</span><span class="sec-m" id="meta">--</span></div>
+    <div class="card" id="stationCard"></div>
   </div>
 </div>
 <div id="page-notif-main" class="page">
   <div class="status-bar"><span class="clock" id="clock2">--:--:--</span></div>
-  <div class="header"><h1>通知</h1><span class="live">INFO</span></div>
+  <div class="header"><h1>閫氱煡</h1><span class="live">INFO</span></div>
   <div class="notif-main">
-    <div class="notif-refresh"><button onclick="fetchNotifs()">↻ 刷新</button></div>
+    <div class="notif-refresh"><button onclick="fetchNotifs()">鈫?鍒锋柊</button></div>
     <div id="notifContent"></div>
-    <div class="notif-source">数据来源：郑州地铁官方公告 · 每日自动同步</div>
+    <div class="notif-source">鏁版嵁鏉ユ簮锛氶儜宸炲湴閾佸畼鏂瑰叕鍛?路 姣忔棩鑷姩鍚屾</div>
   </div>
 </div>
 <div id="page-me" class="page">
-  <div class="profile-header"><div class="avatar">🚇</div><div class="profile-name">通勤达人</div><div class="profile-sub">郑州地铁出行助手</div></div>
-  <div class="stats-bar"><div class="stat-item"><div class="stat-val">0</div><div class="stat-label">乘车次数</div></div><div class="stat-item"><div class="stat-val">0</div><div class="stat-label">节省时间</div></div><div class="stat-item"><div class="stat-val">0</div><div class="stat-label">覆盖站点</div></div></div>
-  <div class="menu-section"><div class="menu-title">功能</div><div class="menu-card">
-    <div class="menu-item" onclick="showSubPage('bug')"><div class="menu-icon" style="background:rgba(251,191,36,.12)">🐛</div><div class="menu-text"><div class="m-title">Bug 反馈</div><div class="m-desc">数据异常、功能问题</div></div><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="showSubPage('records')"><div class="menu-icon" style="background:rgba(56,189,248,.12)">📊</div><div class="menu-text"><div class="m-title">出行记录</div><div class="m-desc">历史乘车数据</div></div><span class="menu-arrow">›</span></div>
+  <div class="profile-header"><div class="avatar">馃殗</div><div class="profile-name">閫氬嫟杈句汉</div><div class="profile-sub">閮戝窞鍦伴搧鍑鸿鍔╂墜</div></div>
+  <div class="stats-bar"><div class="stat-item"><div class="stat-val">0</div><div class="stat-label">涔樿溅娆℃暟</div></div><div class="stat-item"><div class="stat-val">0</div><div class="stat-label">鑺傜渷鏃堕棿</div></div><div class="stat-item"><div class="stat-val">0</div><div class="stat-label">瑕嗙洊绔欑偣</div></div></div>
+  <div class="menu-section"><div class="menu-title">鍔熻兘</div><div class="menu-card">
+    <div class="menu-item" onclick="showSubPage('bug')"><div class="menu-icon" style="background:rgba(251,191,36,.12)">馃悰</div><div class="menu-text"><div class="m-title">Bug 鍙嶉</div><div class="m-desc">鏁版嵁寮傚父銆佸姛鑳介棶棰?/div></div><span class="menu-arrow">鈥?/span></div>
+    <div class="menu-item" onclick="showSubPage('records')"><div class="menu-icon" style="background:rgba(56,189,248,.12)">馃搳</div><div class="menu-text"><div class="m-title">鍑鸿璁板綍</div><div class="m-desc">鍘嗗彶涔樿溅鏁版嵁</div></div><span class="menu-arrow">鈥?/span></div>
   </div></div>
-  <div class="menu-section"><div class="menu-title">其他</div><div class="menu-card">
-    <div class="menu-item" onclick="showSubPage('settings')"><div class="menu-icon" style="background:rgba(255,255,255,.06)">⚙️</div><div class="menu-text"><div class="m-title">设置</div><div class="m-desc">提醒、刷新频率</div></div><span class="menu-arrow">›</span></div>
-    <div class="menu-item" onclick="showSubPage('about')"><div class="menu-icon" style="background:rgba(167,139,250,.12)">ℹ️</div><div class="menu-text"><div class="m-title">关于</div><div class="m-desc">版本信息</div></div><span class="menu-arrow">›</span></div>
+  <div class="menu-section"><div class="menu-title">鍏朵粬</div><div class="menu-card">
+    <div class="menu-item" onclick="showSubPage('settings')"><div class="menu-icon" style="background:rgba(255,255,255,.06)">鈿欙笍</div><div class="menu-text"><div class="m-title">璁剧疆</div><div class="m-desc">鎻愰啋銆佸埛鏂伴鐜?/div></div><span class="menu-arrow">鈥?/span></div>
+    <div class="menu-item" onclick="showSubPage('about')"><div class="menu-icon" style="background:rgba(167,139,250,.12)">鈩癸笍</div><div class="menu-text"><div class="m-title">鍏充簬</div><div class="m-desc">鐗堟湰淇℃伅</div></div><span class="menu-arrow">鈥?/span></div>
   </div></div>
 </div>
-<div id="page-bug" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">←</div><span class="sub-title">Bug 反馈</span></div><div class="bug-form"><div class="form-group"><label class="form-label">反馈类型</label><select class="form-select" id="bugType"><option>数据不准确</option><option>倒计时异常</option><option>换乘信息错误</option><option>页面显示问题</option><option>其他</option></select></div><div class="form-group"><label class="form-label">涉及线路</label><select class="form-select" id="bugLine"><option>1号线</option><option>2号线</option><option>3号线</option><option>4号线</option><option>5号线</option><option>6号线</option><option>8号线</option><option>10号线</option><option>14号线</option></select></div><div class="form-group"><label class="form-label">问题描述</label><textarea class="form-textarea" id="bugDesc" placeholder="请详细描述你遇到的问题..."></textarea></div><div class="form-group"><label class="form-label">联系方式（可选）</label><input class="form-input" id="bugContact" placeholder="邮箱或微信号"></div><button class="submit-btn" onclick="submitBug()">提交反馈</button></div></div>
-<div id="page-records" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">←</div><span class="sub-title">出行记录</span></div><div class="records-empty"><div class="re-icon">📋</div><div>暂无出行记录</div></div></div>
-<div id="page-settings" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">←</div><span class="sub-title">设置</span></div><div class="setting-section"><div class="setting-title">提醒设置</div><div class="setting-card"><div class="setting-item"><span class="setting-left">即将到站提醒</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="setting-item"><span class="setting-left">停靠中提醒</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="setting-item"><span class="setting-left">末班车提醒</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div></div></div><div class="setting-section"><div class="setting-title">刷新设置</div><div class="setting-card"><div class="setting-item"><span class="setting-left">刷新频率</span><span class="setting-right">1秒</span></div><div class="setting-item"><span class="setting-left">省电模式</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div></div></div><div class="setting-section"><div class="setting-title">默认设置</div><div class="setting-card"><div class="setting-item"><span class="setting-left">默认线路</span><span class="setting-right">1号线</span></div><div class="setting-item"><span class="setting-left">默认方向</span><span class="setting-right">河南工业大学→河南大学新区</span></div></div></div></div>
-<div id="page-about" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">←</div><span class="sub-title">关于</span></div><div class="about-content"><div class="about-logo">🚇</div><div class="about-name">郑州地铁 · 到站推算</div><div class="about-ver">v2.4.0</div><div class="about-desc">覆盖郑州线网 11 条线路。接入高德 Key 后完全使用真实班次时刻，本地推算自动关闭。列车位置浮动框标记两站间过渡动画。</div><div class="about-info"><div class="ai-row"><span class="ai-label">线路数量</span><span>11 条</span></div><div class="ai-row"><span class="ai-label">覆盖站点</span><span>250 个</span></div><div class="ai-row"><span class="ai-label">数据来源</span><span>时刻表推算 + 高德实时校准</span></div><div class="ai-row"><span class="ai-label">刷新频率</span><span>每秒刷新</span></div><div class="ai-row"><span class="ai-label">列车定位</span><span>浮动框 + 两站过渡</span></div></div></div></div>
-<div class="tab-bar"><div class="tab-item active" onclick="switchTab('metro')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3"/><line x1="4" y1="10" x2="20" y2="10"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/><line x1="9" y1="17" x2="9" y2="18.5"/><line x1="15" y1="17" x2="15" y2="18.5"/></svg><span>地铁</span></div><div class="tab-item" onclick="switchTab('notif-main')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>通知</span></div><div class="tab-item" onclick="switchTab('me')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>我的</span></div></div>
+<div id="page-bug" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">鈫?/div><span class="sub-title">Bug 鍙嶉</span></div><div class="bug-form"><div class="form-group"><label class="form-label">鍙嶉绫诲瀷</label><select class="form-select" id="bugType"><option>鏁版嵁涓嶅噯纭?/option><option>鍊掕鏃跺紓甯?/option><option>鎹箻淇℃伅閿欒</option><option>椤甸潰鏄剧ず闂</option><option>鍏朵粬</option></select></div><div class="form-group"><label class="form-label">娑夊強绾胯矾</label><select class="form-select" id="bugLine"><option>1鍙风嚎</option><option>2鍙风嚎</option><option>3鍙风嚎</option><option>4鍙风嚎</option><option>5鍙风嚎</option><option>6鍙风嚎</option><option>8鍙风嚎</option><option>10鍙风嚎</option><option>14鍙风嚎</option></select></div><div class="form-group"><label class="form-label">闂鎻忚堪</label><textarea class="form-textarea" id="bugDesc" placeholder="璇疯缁嗘弿杩颁綘閬囧埌鐨勯棶棰?.."></textarea></div><div class="form-group"><label class="form-label">鑱旂郴鏂瑰紡锛堝彲閫夛級</label><input class="form-input" id="bugContact" placeholder="閭鎴栧井淇″彿"></div><button class="submit-btn" onclick="submitBug()">鎻愪氦鍙嶉</button></div></div>
+<div id="page-records" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">鈫?/div><span class="sub-title">鍑鸿璁板綍</span></div><div class="records-empty"><div class="re-icon">馃搵</div><div>鏆傛棤鍑鸿璁板綍</div></div></div>
+<div id="page-settings" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">鈫?/div><span class="sub-title">璁剧疆</span></div><div class="setting-section"><div class="setting-title">鎻愰啋璁剧疆</div><div class="setting-card"><div class="setting-item"><span class="setting-left">鍗冲皢鍒扮珯鎻愰啋</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="setting-item"><span class="setting-left">鍋滈潬涓彁閱?/span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="setting-item"><span class="setting-left">鏈彮杞︽彁閱?/span><div class="toggle" onclick="this.classList.toggle('on')"></div></div></div></div><div class="setting-section"><div class="setting-title">鍒锋柊璁剧疆</div><div class="setting-card"><div class="setting-item"><span class="setting-left">鍒锋柊棰戠巼</span><span class="setting-right">1绉?/span></div><div class="setting-item"><span class="setting-left">鐪佺數妯″紡</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div></div></div><div class="setting-section"><div class="setting-title">榛樿璁剧疆</div><div class="setting-card"><div class="setting-item"><span class="setting-left">榛樿绾胯矾</span><span class="setting-right">1鍙风嚎</span></div><div class="setting-item"><span class="setting-left">榛樿鏂瑰悜</span><span class="setting-right">娌冲崡宸ヤ笟澶у鈫掓渤鍗楀ぇ瀛︽柊鍖?/span></div></div></div></div>
+<div id="page-about" class="sub-page"><div class="sub-header"><div class="back-btn" onclick="goBack()">鈫?/div><span class="sub-title">鍏充簬</span></div><div class="about-content"><div class="about-logo">馃殗</div><div class="about-name">閮戝窞鍦伴搧 路 鍒扮珯鎺ㄧ畻</div><div class="about-ver">v2.4.0</div><div class="about-desc">瑕嗙洊閮戝窞绾跨綉 11 鏉＄嚎璺紝浣跨敤鏈湴鏃跺埢琛ㄦ帹绠?+ 楂樺痉璺嚎鑰楁椂鏍″噯銆?/div><div class="about-info"><div class="ai-row"><span class="ai-label">绾胯矾鏁伴噺</span><span>11 鏉?/span></div><div class="ai-row"><span class="ai-label">瑕嗙洊绔欑偣</span><span>250 涓?/span></div><div class="ai-row"><span class="ai-label">鏁版嵁鏉ユ簮</span><span>鏃跺埢琛ㄦ帹绠?+ 楂樺痉鏍″噯</span></div><div class="ai-row"><span class="ai-label">鍒锋柊棰戠巼</span><span>姣忕鍒锋柊</span></div></div></div></div>
+<div class="tab-bar"><div class="tab-item active" onclick="switchTab('metro')"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3"/><line x1="4" y1="10" x2="20" y2="10"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/><line x1="9" y1="17" x2="9" y2="18.5"/><line x1="15" y1="17" x2="15" y2="18.5"/></svg><span>鍦伴搧</span></div><div class="tab-item" onclick="switchTab('notif-main')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>閫氱煡</span></div><div class="tab-item" onclick="switchTab('me')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>鎴戠殑</span></div></div>
 <div class="toast" id="toast"></div>
 <script>
-/* ─────────────────────────────────────────────
-   线路数据（完整）
-───────────────────────────────────────────── */
 const LINES={
-"1号线":{color:"#e8384f",from:"河南工业大学",to:"河南大学新区",firstTrain:360,lastTrain:1380,peakInterval:240,offpeakInterval:380,dwell:30,stations:[{n:"河南工业大学",t:0},{n:"郑大科技园",t:140},{n:"郑州大学",tr:"8号线",tc:"#84cc16",t:270},{n:"梧桐街",t:400},{n:"兰寨",t:530},{n:"铁炉",tr:"14号线",tc:"#a78bfa",t:660},{n:"市民中心",t:790},{n:"西流湖",t:920},{n:"西三环",t:1050},{n:"秦岭路",t:1180},{n:"五一公园·市中医院",tr:"5号线",tc:"#7c3aed",t:1310},{n:"碧沙岗",t:1440},{n:"绿城广场",tr:"10号线",tc:"#06b6d4",t:1570},{n:"医学院",tr:"7号线",tc:"#d4a574",t:1700},{n:"郑州火车站",t:1830},{n:"二七广场",tr:"3号线",tc:"#22c55e",t:1960},{n:"人民路·河南中医一附院",t:2090},{n:"紫荆山",tr:"2号线",tc:"#f59e0b",t:2220},{n:"燕庄",tr:"6号线",tc:"#a855f7",t:2350},{n:"民航路",t:2480},{n:"会展中心",tr:"4号线",tc:"#3b82f6",t:2610},{n:"黄河南路",t:2740},{n:"农业南路",t:2870},{n:"东风南路",t:3000},{n:"郑州东站",tr:"5号线",tc:"#7c3aed",t:3130},{n:"博学路",t:3260},{n:"市体育中心",t:3390},{n:"龙子湖",t:3520},{n:"文苑北路",t:3650},{n:"河南大学新区",t:3780}]},
-"2号线":{color:"#f59e0b",from:"贾河",to:"南四环(郑州航空港站)",firstTrain:360,lastTrain:1380,peakInterval:270,offpeakInterval:420,dwell:30,stations:[{n:"贾河",t:0},{n:"惠济区政府·市三院惠济院区",t:135},{n:"毛庄",t:260},{n:"黄河迎宾馆",tr:"7号线",tc:"#d4a574",t:385},{n:"金洼",t:510},{n:"金达路",t:635},{n:"刘庄",t:760},{n:"柳林",t:885},{n:"沙门",tr:"4号线",tc:"#3b82f6",t:1010},{n:"北三环",t:1135},{n:"东风路",tr:"8号线",tc:"#84cc16",t:1260},{n:"关虎屯",t:1385},{n:"黄河路",tr:"5号线",tc:"#7c3aed",t:1510},{n:"紫荆山",tr:"1号线",tc:"#e8384f",t:1635},{n:"东大街·市第一人民医院",tr:"3号线",tc:"#22c55e",t:1760},{n:"陇海东路",t:1885},{n:"二里岗",tr:"6号线",tc:"#a855f7",t:2010},{n:"南五里堡",tr:"5号线",tc:"#7c3aed",t:2135},{n:"花寨",t:2260},{n:"南三环",t:2385},{n:"站马屯",t:2510},{n:"南四环(郑州航空港站)",tr:"城郊线",tc:"#10b981",t:2635}]},
-"3号线":{color:"#22c55e",from:"滨河新城南",to:"省体育中心",firstTrain:360,lastTrain:1395,peakInterval:300,offpeakInterval:420,dwell:30,stations:[{n:"滨河新城南",t:0},{n:"司赵·市七院滨河院区",t:130},{n:"滨河新城",t:260},{n:"潮河",t:390},{n:"营岗",t:520},{n:"圃田西",t:650},{n:"省骨科医院",tr:"5号线",tc:"#7c3aed",t:780},{n:"东周",t:910},{n:"西周",t:1040},{n:"通泰路",t:1170},{n:"东十里铺",tr:"4号线",tc:"#3b82f6",t:1300},{n:"凤凰台",t:1430},{n:"博览中心",t:1560},{n:"郑州文庙",t:1690},{n:"东大街·市第一人民医院",tr:"2号线",tc:"#f59e0b",t:1820},{n:"西大街",t:1950},{n:"二七广场",tr:"1号线",tc:"#e8384f",t:2080},{n:"人民公园",t:2210},{n:"大石桥·市妇幼保健院",t:2340},{n:"海滩寺",tr:"5号线",tc:"#7c3aed",t:2470},{n:"南阳新村",t:2600},{n:"同乐",tr:"8号线",tc:"#84cc16",t:2730},{n:"兴隆铺",t:2860},{n:"王砦",t:2990},{n:"省体育中心",t:3120}]},
-"城郊线":{color:"#10b981",from:"南四环(贾河)",to:"郑州航空港站",firstTrain:360,lastTrain:1320,peakInterval:360,offpeakInterval:480,dwell:30,stations:[{n:"南四环(贾河)",tr:"2号线",tc:"#f59e0b",t:0},{n:"十八里河",t:150},{n:"沙窝李",t:280},{n:"双湖大道",t:410},{n:"小乔",t:540},{n:"华南城西",t:670},{n:"华南城",t:800},{n:"华南城东",t:930},{n:"孟庄",t:1060},{n:"港区北",t:1190},{n:"康平湖",t:1320},{n:"兰河公园",t:1450},{n:"恩平湖",t:1580},{n:"综合保税区",t:1710},{n:"新郑机场",t:1840},{n:"3号航站楼",t:1970},{n:"机场东",t:2100},{n:"港区会展",t:2230},{n:"郑州航空港站",t:2360}]},
-"4号线":{color:"#3b82f6",from:"郎庄",to:"老鸦陈",firstTrain:360,lastTrain:1380,peakInterval:300,offpeakInterval:450,dwell:30,stations:[{n:"郎庄",t:0},{n:"姚庄",t:130},{n:"金岱",t:260},{n:"果树所",t:390},{n:"七里河",tr:"5号线",tc:"#7c3aed",t:520},{n:"货站街",t:650},{n:"东十里铺",tr:"3号线",tc:"#22c55e",t:780},{n:"商鼎路",t:910},{n:"会展中心",tr:"1号线",tc:"#e8384f",t:1040},{n:"中央商务区",tr:"5号线",tc:"#7c3aed",t:1170},{n:"农业东路",t:1300},{n:"龙湖中环南",tr:"8号线",tc:"#84cc16",t:1430},{n:"龙湖南",t:1560},{n:"金融岛南",t:1690},{n:"金融岛北",t:1820},{n:"龙湖北",t:1950},{n:"龙湖中环北",t:2080},{n:"清华附中",tr:"6号线",tc:"#a855f7",t:2210},{n:"森林公园北",t:2340},{n:"杨君刘",t:2470},{n:"沙门",tr:"2号线",tc:"#f59e0b",t:2600},{n:"陈寨东",t:2730},{n:"张家村",tr:"7号线",tc:"#d4a574",t:2860},{n:"丰庆路",t:2990},{n:"北二十里铺",t:3120},{n:"省体育中心",tr:"3号线",tc:"#22c55e",t:3250},{n:"老鸦陈",t:3380}]},
-"5号线":{color:"#7c3aed",from:"月季公园(环线)",to:"月季公园(环线)",firstTrain:360,lastTrain:1380,peakInterval:300,offpeakInterval:480,dwell:30,stations:[{n:"月季公园",tr:"1号线",tc:"#e8384f",t:0},{n:"沙口路",t:130},{n:"海滩寺",tr:"3号线",tc:"#22c55e",t:260},{n:"郑州人民医院",tr:"7号线",tc:"#d4a574",t:390},{n:"黄河路",tr:"2号线",tc:"#f59e0b",t:520},{n:"省人民医院",t:650},{n:"姚砦·聂庄",tr:"6号线",tc:"#a855f7",t:780},{n:"众意西路",t:910},{n:"中央商务区",tr:"4号线",tc:"#3b82f6",t:1040},{n:"儿童医院·颐和医院",t:1170},{n:"祭城",t:1300},{n:"金水东路",t:1430},{n:"郑州东站",tr:"1号线",tc:"#e8384f",t:1560},{n:"康宁街",t:1690},{n:"省骨科医院",tr:"3号线",tc:"#22c55e",t:1820},{n:"经北二路",t:1950},{n:"经开中心广场",t:2080},{n:"福塔东",t:2210},{n:"中原福塔",t:2340},{n:"七里河",tr:"4号线",tc:"#3b82f6",t:2470},{n:"航海广场",t:2600},{n:"城东南路",t:2730},{n:"南五里堡",tr:"2号线",tc:"#f59e0b",t:2860},{n:"冯庄",t:2990},{n:"京广南路·市第六人民医院",t:3120},{n:"市第二人民医院",tr:"7号线",tc:"#d4a574",t:3250},{n:"齐礼阎",t:3380},{n:"后河芦·市第八人民医院",t:3510},{n:"桐淮",tr:"6号线",tc:"#a855f7",t:3640},{n:"陇海西路",t:3770},{n:"市中心医院",tr:"10号线",tc:"#06b6d4",t:3900},{n:"五一公园·市中医院",tr:"1号线",tc:"#e8384f",t:4030},{n:"月季公园",tr:"1号线",tc:"#e8384f",t:4160}]},
-"6号线":{color:"#a855f7",from:"贾峪",to:"清华附中",firstTrain:360,lastTrain:1380,peakInterval:330,offpeakInterval:480,dwell:30,stations:[{n:"贾峪",t:0},{n:"洞林湖",t:140},{n:"洞林寺",t:270},{n:"安宁路",t:400},{n:"马寨",t:530},{n:"河南建院",t:660},{n:"金桢路",t:790},{n:"奥体中心西",t:920},{n:"奥体中心",tr:"14号线",tc:"#a78bfa",t:1050},{n:"常庄",t:1180},{n:"冯湾",t:1310},{n:"李江沟",t:1440},{n:"卧龙岗",t:1570},{n:"桐淮",tr:"5号线",tc:"#7c3aed",t:1700},{n:"嵩淮",t:1830},{n:"大学中路",tr:"7号线",tc:"#d4a574",t:1960},{n:"火车头体育场",t:2090},{n:"陇秀公园",t:2220},{n:"二里岗",tr:"2号线",tc:"#f59e0b",t:2350},{n:"二里岗东",t:2480},{n:"凤凰台南",t:2610},{n:"博览中心",tr:"3号线",tc:"#22c55e",t:2740},{n:"燕庄",tr:"1号线",tc:"#e8384f",t:2870},{n:"姚砦·聂庄",tr:"5号线",tc:"#7c3aed",t:3000},{n:"金汇桥",t:3130},{n:"小营",tr:"8号线",tc:"#84cc16",t:3260},{n:"金融岛西",t:3390},{n:"清华附中",tr:"4号线",tc:"#3b82f6",t:3520}]},
-"7号线":{color:"#d4a574",from:"黄河博览馆",to:"南岗刘",firstTrain:360,lastTrain:1380,peakInterval:330,offpeakInterval:480,dwell:30,stations:[{n:"黄河博览馆",t:0},{n:"东赵",t:140},{n:"黄河迎宾馆",tr:"2号线",tc:"#f59e0b",t:270},{n:"北大学城",t:400},{n:"琉璃寺",t:530},{n:"张家村",tr:"4号线",tc:"#3b82f6",t:660},{n:"陈砦",t:790},{n:"白庙",tr:"8号线",tc:"#84cc16",t:920},{n:"农业大学",t:1050},{n:"郑州人民医院",tr:"5号线",tc:"#7c3aed",t:1180},{n:"大石桥·市妇幼保健院",tr:"3号线",tc:"#22c55e",t:1310},{n:"郑大一附院",t:1440},{n:"医学院",tr:"1号线",tc:"#e8384f",t:1570},{n:"市骨科医院",t:1700},{n:"大学中路",tr:"6号线",tc:"#a855f7",t:1830},{n:"市第二人民医院",tr:"5号线",tc:"#7c3aed",t:1960},{n:"王胡砦",t:2090},{n:"漓江路",t:2220},{n:"荆胡",t:2350},{n:"南环公园",t:2480},{n:"南岗刘",t:2610}]},
-"8号线":{color:"#84cc16",from:"天健湖",to:"鲁庙",firstTrain:360,lastTrain:1380,peakInterval:300,offpeakInterval:420,dwell:30,stations:[{n:"天健湖",t:0},{n:"轻工业大学",t:130},{n:"祥营",t:260},{n:"郑州大学",tr:"1号线",tc:"#e8384f",t:390},{n:"银屏路",t:520},{n:"冬青街",t:650},{n:"南流",t:780},{n:"大学科技园",t:910},{n:"五龙口",t:1040},{n:"同乐",tr:"3号线",tc:"#22c55e",t:1170},{n:"省中医院",t:1300},{n:"白庙",tr:"7号线",tc:"#d4a574",t:1430},{n:"东风路",tr:"2号线",tc:"#f59e0b",t:1560},{n:"枣庄",t:1690},{n:"小营",tr:"6号线",tc:"#a855f7",t:1820},{n:"龙湖中环南",tr:"4号线",tc:"#3b82f6",t:1950},{n:"郑大一附院东区",t:2080},{n:"高铁公园",t:2210},{n:"畅和街",t:2340},{n:"郑州东站",tr:"5号线",tc:"#7c3aed",t:2470},{n:"圃田西",tr:"3号线",tc:"#22c55e",t:2600},{n:"圃田",t:2730},{n:"省社科院",t:2860},{n:"福泽路",t:2990},{n:"李湖桥",t:3120},{n:"龙王庙",t:3250},{n:"绿博园",t:3380},{n:"鲁庙",t:3510}]},
-"10号线":{color:"#06b6d4",from:"郑州火车站",to:"郑州西站",firstTrain:360,lastTrain:1380,peakInterval:360,offpeakInterval:540,dwell:30,stations:[{n:"郑州火车站",tr:"1号线",tc:"#e8384f",t:0},{n:"医学院",tr:"7号线",tc:"#d4a574",t:140},{n:"绿城广场",tr:"1号线",tc:"#e8384f",t:270},{n:"市中心医院",tr:"5号线",tc:"#7c3aed",t:400},{n:"二砂",t:530},{n:"西流湖公园南",t:660},{n:"郑州一中",t:790},{n:"市委党校",tr:"14号线",tc:"#a78bfa",t:920},{n:"柳湖",t:1050},{n:"庙王",t:1180},{n:"李商隐公园",t:1310},{n:"郑州西站",t:1440}]},
-"14号线":{color:"#a78bfa",from:"须水",to:"莲湖",firstTrain:360,lastTrain:1380,peakInterval:420,offpeakInterval:600,dwell:30,stations:[{n:"须水",t:0},{n:"铁炉",tr:"1号线",tc:"#e8384f",t:140},{n:"市民大道",t:270},{n:"市委党校",tr:"10号线",tc:"#06b6d4",t:400},{n:"奥体中心",tr:"6号线",tc:"#a855f7",t:530},{n:"莲湖",t:660}]}
+"1鍙风嚎":{color:"#e8384f",from:"娌冲崡宸ヤ笟澶у",to:"娌冲崡澶у鏂板尯",firstTrain:360,lastTrain:1380,peakInterval:240,offpeakInterval:380,dwell:30,stations:[{n:"娌冲崡宸ヤ笟澶у",t:0},{n:"閮戝ぇ绉戞妧鍥?,t:140},{n:"閮戝窞澶у",tr:"8鍙风嚎",tc:"#84cc16",t:270},{n:"姊ф琛?,t:400},{n:"鍏板",t:530},{n:"閾佺倝",tr:"14鍙风嚎",tc:"#a78bfa",t:660},{n:"甯傛皯涓績",t:790},{n:"瑗挎祦婀?,t:920},{n:"瑗夸笁鐜?,t:1050},{n:"绉﹀箔璺?,t:1180},{n:"浜斾竴鍏洯路甯備腑鍖婚櫌",tr:"5鍙风嚎",tc:"#7c3aed",t:1310},{n:"纰ф矙宀?,t:1440},{n:"缁垮煄骞垮満",tr:"10鍙风嚎",tc:"#06b6d4",t:1570},{n:"鍖诲闄?,tr:"7鍙风嚎",tc:"#d4a574",t:1700},{n:"閮戝窞鐏溅绔?,t:1830},{n:"浜屼竷骞垮満",tr:"3鍙风嚎",tc:"#22c55e",t:1960},{n:"浜烘皯璺锋渤鍗椾腑鍖讳竴闄勯櫌",t:2090},{n:"绱崋灞?,tr:"2鍙风嚎",tc:"#f59e0b",t:2220},{n:"鐕曞簞",tr:"6鍙风嚎",tc:"#a855f7",t:2350},{n:"姘戣埅璺?,t:2480},{n:"浼氬睍涓績",tr:"4鍙风嚎",tc:"#3b82f6",t:2610},{n:"榛勬渤鍗楄矾",t:2740},{n:"鍐滀笟鍗楄矾",t:2870},{n:"涓滈鍗楄矾",t:3000},{n:"閮戝窞涓滅珯",tr:"5鍙风嚎",tc:"#7c3aed",t:3130},{n:"鍗氬璺?,t:3260},{n:"甯備綋鑲蹭腑蹇?,t:3390},{n:"榫欏瓙婀?,t:3520},{n:"鏂囪嫅鍖楄矾",t:3650},{n:"娌冲崡澶у鏂板尯",t:3780}]},
+"2鍙风嚎":{color:"#f59e0b",from:"璐炬渤",to:"鍗楀洓鐜?閮戝窞鑸┖娓珯)",firstTrain:360,lastTrain:1380,peakInterval:270,offpeakInterval:420,dwell:30,stations:[{n:"璐炬渤",t:0},{n:"鎯犳祹鍖烘斂搴溌峰競涓夐櫌鎯犳祹闄㈠尯",t:135},{n:"姣涘簞",t:260},{n:"榛勬渤杩庡棣?,tr:"7鍙风嚎",tc:"#d4a574",t:385},{n:"閲戞醇",t:510},{n:"閲戣揪璺?,t:635},{n:"鍒樺簞",t:760},{n:"鏌虫灄",t:885},{n:"娌欓棬",tr:"4鍙风嚎",tc:"#3b82f6",t:1010},{n:"鍖椾笁鐜?,t:1135},{n:"涓滈璺?,tr:"8鍙风嚎",tc:"#84cc16",t:1260},{n:"鍏宠檸灞?,t:1385},{n:"榛勬渤璺?,tr:"5鍙风嚎",tc:"#7c3aed",t:1510},{n:"绱崋灞?,tr:"1鍙风嚎",tc:"#e8384f",t:1635},{n:"涓滃ぇ琛椔峰競绗竴浜烘皯鍖婚櫌",tr:"3鍙风嚎",tc:"#22c55e",t:1760},{n:"闄囨捣涓滆矾",t:1885},{n:"浜岄噷宀?,tr:"6鍙风嚎",tc:"#a855f7",t:2010},{n:"鍗椾簲閲屽牎",tr:"5鍙风嚎",tc:"#7c3aed",t:2135},{n:"鑺卞",t:2260},{n:"鍗椾笁鐜?,t:2385},{n:"绔欓┈灞?,t:2510},{n:"鍗楀洓鐜?閮戝窞鑸┖娓珯)",tr:"鍩庨儕绾?,tc:"#10b981",t:2635}]},
+"3鍙风嚎":{color:"#22c55e",from:"婊ㄦ渤鏂板煄鍗?,to:"鐪佷綋鑲蹭腑蹇?,firstTrain:360,lastTrain:1395,peakInterval:300,offpeakInterval:420,dwell:30,stations:[{n:"婊ㄦ渤鏂板煄鍗?,t:0},{n:"鍙歌档路甯備竷闄㈡花娌抽櫌鍖?,t:130},{n:"婊ㄦ渤鏂板煄",t:260},{n:"娼渤",t:390},{n:"钀ュ矖",t:520},{n:"鍦冪敯瑗?,t:650},{n:"鐪侀绉戝尰闄?,tr:"5鍙风嚎",tc:"#7c3aed",t:780},{n:"涓滃懆",t:910},{n:"瑗垮懆",t:1040},{n:"閫氭嘲璺?,t:1170},{n:"涓滃崄閲岄摵",tr:"4鍙风嚎",tc:"#3b82f6",t:1300},{n:"鍑ゅ嚢鍙?,t:1430},{n:"鍗氳涓績",t:1560},{n:"閮戝窞鏂囧簷",t:1690},{n:"涓滃ぇ琛椔峰競绗竴浜烘皯鍖婚櫌",tr:"2鍙风嚎",tc:"#f59e0b",t:1820},{n:"瑗垮ぇ琛?,t:1950},{n:"浜屼竷骞垮満",tr:"1鍙风嚎",tc:"#e8384f",t:2080},{n:"浜烘皯鍏洯",t:2210},{n:"澶х煶妗ヂ峰競濡囧辜淇濆仴闄?,t:2340},{n:"娴锋哗瀵?,tr:"5鍙风嚎",tc:"#7c3aed",t:2470},{n:"鍗楅槼鏂版潙",t:2600},{n:"鍚屼箰",tr:"8鍙风嚎",tc:"#84cc16",t:2730},{n:"鍏撮殕閾?,t:2860},{n:"鐜嬬牔",t:2990},{n:"鐪佷綋鑲蹭腑蹇?,t:3120}]},
+"鍩庨儕绾?:{color:"#10b981",from:"鍗楀洓鐜?璐炬渤)",to:"閮戝窞鑸┖娓珯",firstTrain:360,lastTrain:1320,peakInterval:360,offpeakInterval:480,dwell:30,stations:[{n:"鍗楀洓鐜?璐炬渤)",tr:"2鍙风嚎",tc:"#f59e0b",t:0},{n:"鍗佸叓閲屾渤",t:150},{n:"娌欑獫鏉?,t:280},{n:"鍙屾箹澶ч亾",t:410},{n:"灏忎箶",t:540},{n:"鍗庡崡鍩庤タ",t:670},{n:"鍗庡崡鍩?,t:800},{n:"鍗庡崡鍩庝笢",t:930},{n:"瀛熷簞",t:1060},{n:"娓尯鍖?,t:1190},{n:"搴峰钩婀?,t:1320},{n:"鍏版渤鍏洯",t:1450},{n:"鎭╁钩婀?,t:1580},{n:"缁煎悎淇濈◣鍖?,t:1710},{n:"鏂伴儜鏈哄満",t:1840},{n:"3鍙疯埅绔欐ゼ",t:1970},{n:"鏈哄満涓?,t:2100},{n:"娓尯浼氬睍",t:2230},{n:"閮戝窞鑸┖娓珯",t:2360}]},
+"4鍙风嚎":{color:"#3b82f6",from:"閮庡簞",to:"鑰侀甫闄?,firstTrain:360,lastTrain:1380,peakInterval:300,offpeakInterval:450,dwell:30,stations:[{n:"閮庡簞",t:0},{n:"濮氬簞",t:130},{n:"閲戝脖",t:260},{n:"鏋滄爲鎵€",t:390},{n:"涓冮噷娌?,tr:"5鍙风嚎",tc:"#7c3aed",t:520},{n:"璐х珯琛?,t:650},{n:"涓滃崄閲岄摵",tr:"3鍙风嚎",tc:"#22c55e",t:780},{n:"鍟嗛紟璺?,t:910},{n:"浼氬睍涓績",tr:"1鍙风嚎",tc:"#e8384f",t:1040},{n:"涓ぎ鍟嗗姟鍖?,tr:"5鍙风嚎",tc:"#7c3aed",t:1170},{n:"鍐滀笟涓滆矾",t:1300},{n:"榫欐箹涓幆鍗?,tr:"8鍙风嚎",tc:"#84cc16",t:1430},{n:"榫欐箹鍗?,t:1560},{n:"閲戣瀺宀涘崡",t:1690},{n:"閲戣瀺宀涘寳",t:1820},{n:"榫欐箹鍖?,t:1950},{n:"榫欐箹涓幆鍖?,t:2080},{n:"娓呭崕闄勪腑",tr:"6鍙风嚎",tc:"#a855f7",t:2210},{n:"妫灄鍏洯鍖?,t:2340},{n:"鏉ㄥ悰鍒?,t:2470},{n:"娌欓棬",tr:"2鍙风嚎",tc:"#f59e0b",t:2600},{n:"闄堝涓?,t:2730},{n:"寮犲鏉?,tr:"7鍙风嚎",tc:"#d4a574",t:2860},{n:"涓板簡璺?,t:2990},{n:"鍖椾簩鍗侀噷閾?,t:3120},{n:"鐪佷綋鑲蹭腑蹇?,tr:"3鍙风嚎",tc:"#22c55e",t:3250},{n:"鑰侀甫闄?,t:3380}]},
+"5鍙风嚎":{color:"#7c3aed",from:"鏈堝鍏洯(鐜嚎)",to:"鏈堝鍏洯(鐜嚎)",firstTrain:360,lastTrain:1380,peakInterval:300,offpeakInterval:480,dwell:30,stations:[{n:"鏈堝鍏洯",tr:"1鍙风嚎",tc:"#e8384f",t:0},{n:"娌欏彛璺?,t:130},{n:"娴锋哗瀵?,tr:"3鍙风嚎",tc:"#22c55e",t:260},{n:"閮戝窞浜烘皯鍖婚櫌",tr:"7鍙风嚎",tc:"#d4a574",t:390},{n:"榛勬渤璺?,tr:"2鍙风嚎",tc:"#f59e0b",t:520},{n:"鐪佷汉姘戝尰闄?,t:650},{n:"濮氱牔路鑱傚簞",tr:"6鍙风嚎",tc:"#a855f7",t:780},{n:"浼楁剰瑗胯矾",t:910},{n:"涓ぎ鍟嗗姟鍖?,tr:"4鍙风嚎",tc:"#3b82f6",t:1040},{n:"鍎跨鍖婚櫌路棰愬拰鍖婚櫌",t:1170},{n:"绁煄",t:1300},{n:"閲戞按涓滆矾",t:1430},{n:"閮戝窞涓滅珯",tr:"1鍙风嚎",tc:"#e8384f",t:1560},{n:"搴峰畞琛?,t:1690},{n:"鐪侀绉戝尰闄?,tr:"3鍙风嚎",tc:"#22c55e",t:1820},{n:"缁忓寳浜岃矾",t:1950},{n:"缁忓紑涓績骞垮満",t:2080},{n:"绂忓涓?,t:2210},{n:"涓師绂忓",t:2340},{n:"涓冮噷娌?,tr:"4鍙风嚎",tc:"#3b82f6",t:2470},{n:"鑸捣骞垮満",t:2600},{n:"鍩庝笢鍗楄矾",t:2730},{n:"鍗椾簲閲屽牎",tr:"2鍙风嚎",tc:"#f59e0b",t:2860},{n:"鍐簞",t:2990},{n:"浜箍鍗楄矾路甯傜鍏汉姘戝尰闄?,t:3120},{n:"甯傜浜屼汉姘戝尰闄?,tr:"7鍙风嚎",tc:"#d4a574",t:3250},{n:"榻愮ぜ闃?,t:3380},{n:"鍚庢渤鑺β峰競绗叓浜烘皯鍖婚櫌",t:3510},{n:"妗愭樊",tr:"6鍙风嚎",tc:"#a855f7",t:3640},{n:"闄囨捣瑗胯矾",t:3770},{n:"甯備腑蹇冨尰闄?,tr:"10鍙风嚎",tc:"#06b6d4",t:3900},{n:"浜斾竴鍏洯路甯備腑鍖婚櫌",tr:"1鍙风嚎",tc:"#e8384f",t:4030},{n:"鏈堝鍏洯",tr:"1鍙风嚎",tc:"#e8384f",t:4160}]},
+"6鍙风嚎":{color:"#a855f7",from:"璐惧唱",to:"娓呭崕闄勪腑",firstTrain:360,lastTrain:1380,peakInterval:330,offpeakInterval:480,dwell:30,stations:[{n:"璐惧唱",t:0},{n:"娲炴灄婀?,t:140},{n:"娲炴灄瀵?,t:270},{n:"瀹夊畞璺?,t:400},{n:"椹",t:530},{n:"娌冲崡寤洪櫌",t:660},{n:"閲戞、璺?,t:790},{n:"濂ヤ綋涓績瑗?,t:920},{n:"濂ヤ綋涓績",tr:"14鍙风嚎",tc:"#a78bfa",t:1050},{n:"甯稿簞",t:1180},{n:"鍐咕",t:1310},{n:"鏉庢睙娌?,t:1440},{n:"鍗ч緳宀?,t:1570},{n:"妗愭樊",tr:"5鍙风嚎",tc:"#7c3aed",t:1700},{n:"宓╂樊",t:1830},{n:"澶у涓矾",tr:"7鍙风嚎",tc:"#d4a574",t:1960},{n:"鐏溅澶翠綋鑲插満",t:2090},{n:"闄囩鍏洯",t:2220},{n:"浜岄噷宀?,tr:"2鍙风嚎",tc:"#f59e0b",t:2350},{n:"浜岄噷宀椾笢",t:2480},{n:"鍑ゅ嚢鍙板崡",t:2610},{n:"鍗氳涓績",tr:"3鍙风嚎",tc:"#22c55e",t:2740},{n:"鐕曞簞",tr:"1鍙风嚎",tc:"#e8384f",t:2870},{n:"濮氱牔路鑱傚簞",tr:"5鍙风嚎",tc:"#7c3aed",t:3000},{n:"閲戞眹妗?,t:3130},{n:"灏忚惀",tr:"8鍙风嚎",tc:"#84cc16",t:3260},{n:"閲戣瀺宀涜タ",t:3390},{n:"娓呭崕闄勪腑",tr:"4鍙风嚎",tc:"#3b82f6",t:3520}]},
+"7鍙风嚎":{color:"#d4a574",from:"榛勬渤鍗氳棣?,to:"鍗楀矖鍒?,firstTrain:360,lastTrain:1380,peakInterval:330,offpeakInterval:480,dwell:30,stations:[{n:"榛勬渤鍗氳棣?,t:0},{n:"涓滆档",t:140},{n:"榛勬渤杩庡棣?,tr:"2鍙风嚎",tc:"#f59e0b",t:270},{n:"鍖楀ぇ瀛﹀煄",t:400},{n:"鐞夌拑瀵?,t:530},{n:"寮犲鏉?,tr:"4鍙风嚎",tc:"#3b82f6",t:660},{n:"闄堢牔",t:790},{n:"鐧藉簷",tr:"8鍙风嚎",tc:"#84cc16",t:920},{n:"鍐滀笟澶у",t:1050},{n:"閮戝窞浜烘皯鍖婚櫌",tr:"5鍙风嚎",tc:"#7c3aed",t:1180},{n:"澶х煶妗ヂ峰競濡囧辜淇濆仴闄?,tr:"3鍙风嚎",tc:"#22c55e",t:1310},{n:"閮戝ぇ涓€闄勯櫌",t:1440},{n:"鍖诲闄?,tr:"1鍙风嚎",tc:"#e8384f",t:1570},{n:"甯傞绉戝尰闄?,t:1700},{n:"澶у涓矾",tr:"6鍙风嚎",tc:"#a855f7",t:1830},{n:"甯傜浜屼汉姘戝尰闄?,tr:"5鍙风嚎",tc:"#7c3aed",t:1960},{n:"鐜嬭儭鐮?,t:2090},{n:"婕撴睙璺?,t:2220},{n:"鑽嗚儭",t:2350},{n:"鍗楃幆鍏洯",t:2480},{n:"鍗楀矖鍒?,t:2610}]},
+"8鍙风嚎":{color:"#84cc16",from:"澶╁仴婀?,to:"椴佸簷",firstTrain:360,lastTrain:1380,peakInterval:300,offpeakInterval:420,dwell:30,stations:[{n:"澶╁仴婀?,t:0},{n:"杞诲伐涓氬ぇ瀛?,t:130},{n:"绁ヨ惀",t:260},{n:"閮戝窞澶у",tr:"1鍙风嚎",tc:"#e8384f",t:390},{n:"閾跺睆璺?,t:520},{n:"鍐潚琛?,t:650},{n:"鍗楁祦",t:780},{n:"澶у绉戞妧鍥?,t:910},{n:"浜旈緳鍙?,t:1040},{n:"鍚屼箰",tr:"3鍙风嚎",tc:"#22c55e",t:1170},{n:"鐪佷腑鍖婚櫌",t:1300},{n:"鐧藉簷",tr:"7鍙风嚎",tc:"#d4a574",t:1430},{n:"涓滈璺?,tr:"2鍙风嚎",tc:"#f59e0b",t:1560},{n:"鏋ｅ簞",t:1690},{n:"灏忚惀",tr:"6鍙风嚎",tc:"#a855f7",t:1820},{n:"榫欐箹涓幆鍗?,tr:"4鍙风嚎",tc:"#3b82f6",t:1950},{n:"閮戝ぇ涓€闄勯櫌涓滃尯",t:2080},{n:"楂橀搧鍏洯",t:2210},{n:"鐣呭拰琛?,t:2340},{n:"閮戝窞涓滅珯",tr:"5鍙风嚎",tc:"#7c3aed",t:2470},{n:"鍦冪敯瑗?,tr:"3鍙风嚎",tc:"#22c55e",t:2600},{n:"鍦冪敯",t:2730},{n:"鐪佺ぞ绉戦櫌",t:2860},{n:"绂忔辰璺?,t:2990},{n:"鏉庢箹妗?,t:3120},{n:"榫欑帇搴?,t:3250},{n:"缁垮崥鍥?,t:3380},{n:"椴佸簷",t:3510}]},
+"10鍙风嚎":{color:"#06b6d4",from:"閮戝窞鐏溅绔?,to:"閮戝窞瑗跨珯",firstTrain:360,lastTrain:1380,peakInterval:360,offpeakInterval:540,dwell:30,stations:[{n:"閮戝窞鐏溅绔?,tr:"1鍙风嚎",tc:"#e8384f",t:0},{n:"鍖诲闄?,tr:"7鍙风嚎",tc:"#d4a574",t:140},{n:"缁垮煄骞垮満",tr:"1鍙风嚎",tc:"#e8384f",t:270},{n:"甯備腑蹇冨尰闄?,tr:"5鍙风嚎",tc:"#7c3aed",t:400},{n:"浜岀爞",t:530},{n:"瑗挎祦婀栧叕鍥崡",t:660},{n:"閮戝窞涓€涓?,t:790},{n:"甯傚鍏氭牎",tr:"14鍙风嚎",tc:"#a78bfa",t:920},{n:"鏌虫箹",t:1050},{n:"搴欑帇",t:1180},{n:"鏉庡晢闅愬叕鍥?,t:1310},{n:"閮戝窞瑗跨珯",t:1440}]},
+"14鍙风嚎":{color:"#a78bfa",from:"椤绘按",to:"鑾叉箹",firstTrain:360,lastTrain:1380,peakInterval:420,offpeakInterval:600,dwell:30,stations:[{n:"椤绘按",t:0},{n:"閾佺倝",tr:"1鍙风嚎",tc:"#e8384f",t:140},{n:"甯傛皯澶ч亾",t:270},{n:"甯傚鍏氭牎",tr:"10鍙风嚎",tc:"#06b6d4",t:400},{n:"濂ヤ綋涓績",tr:"6鍙风嚎",tc:"#a855f7",t:530},{n:"鑾叉箹",t:660}]}
 };
-
-/* ─────────────────────────────────────────────
-   累计偏移预计算
-───────────────────────────────────────────── */
-const LINE_CUM={};
-Object.keys(LINES).forEach(k=>{
-  const d=LINES[k],c=[0];
-  for(let i=1;i<d.stations.length;i++) c.push(c[i-1]+(d.stations[i].t-d.stations[i-1].t)+d.dwell);
-  LINE_CUM[k]=c;
-});
-
-/* ─────────────────────────────────────────────
-   工具函数
-───────────────────────────────────────────── */
+const LINE_CUM={};Object.keys(LINES).forEach(k=>{const d=LINES[k],c=[0];for(let i=1;i<d.stations.length;i++)c.push(c[i-1]+(d.stations[i].t-d.stations[i-1].t)+d.dwell);LINE_CUM[k]=c});
 function hexRGB(h){const m=h.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);return m?parseInt(m[1],16)+','+parseInt(m[2],16)+','+parseInt(m[3],16):'200,200,200'}
 function singleGrad(r){return'linear-gradient(135deg,rgba('+r+',.08),rgba('+r+',.03))'}
 function transferGrad(r1,r2){return'linear-gradient(135deg,rgba('+r1+',.08),rgba('+r2+',.04))'}
+function fmt(s){s=Math.max(0,Math.ceil(s));if(s>=3600)return Math.floor(s/3600)+'h'+Math.floor((s%3600)/60)+'m';if(s>=60)return Math.floor(s/60)+'鍒?+s%60+'s';return s+'s'}
+function timeColor(s){if(s<=150)return'#fbbf24';return'#e4e8f0'}
+function badgeContent(name){var m=name.match(/^(\d+)(.+)$/);if(m){var h='<span>'+m[1]+'</span>';for(var i=0;i<m[2].length;i++)h+='<span>'+m[2][i]+'</span>';return h}return'<span>'+name+'</span>'}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 
-function fmt(s){
-  s=Math.max(0,Math.ceil(s));
-  if(s>=3600)return Math.floor(s/3600)+'h'+Math.floor((s%3600)/60)+'m';
-  if(s>=60)return Math.floor(s/60)+'分'+s%60+'s';
-  return s+'s';
-}
-
-/**
- * 根据剩余秒数返回颜色 + 是否显示黄框
- * @returns {color, isSoon, isArriving}
- */
-function timeState(s){
-  if(s<=30)  return {color:'#e8384f',isSoon:false,isArriving:true};
-  if(s<=150) return {color:'#fbbf24',isSoon:true, isArriving:false};
-  return           {color:'#e4e8f0',isSoon:false,isArriving:false};
-}
-
-function badgeContent(name){
-  var m=name.match(/^(\d+)(.+)$/);
-  if(m){var h='<span>'+m[1]+'</span>';for(var i=0;i<m[2].length;i++)h+='<span>'+m[2][i]+'</span>';return h}
-  return'<span>'+name+'</span>';
-}
-function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-
-/* ─────────────────────────────────────────────
-   预测引擎
-   修复：有效到站窗口扩大为 (-dwell*2, 5400)
-   确保即将到站的班次不被漏掉
-───────────────────────────────────────────── */
 class Engine{
-  constructor(n){
-    this.name=n;
-    this.data=LINES[n];
-    this.cum=LINE_CUM[n];
-    this.totalCycle=this.cum[this.cum.length-1];
-    // 高德实时班次注入（绝对到站时间，秒，以当天零点为基准）
-    // 结构：{ stationIdx: [absArrivalSec, ...] }
-    this._gaodeTimes={};
-  }
-  intervalAt(t0){
-    const m=t0/60;
-    return((m>=420&&m<=540)||(m>=1020&&m<=1140))?this.data.peakInterval:this.data.offpeakInterval;
-  }
-  stationOffset(idx,reverse){
-    return reverse?this.totalCycle-this.cum[idx]:this.cum[idx];
-  }
-  stationOrder(reverse){
-    var stns=this.data.stations;
-    if(reverse){var rev=[];for(var i=stns.length-1;i>=0;i--)rev.push({s:stns[i],i:i});return rev}
-    return stns.map((s,i)=>({s,i}));
-  }
-  /**
-   * 注入高德班次时间
-   * @param {Object} map  { stationIdx: [sec_since_midnight, ...] }
-   */
-  injectGaodeTimes(map){
-    this._gaodeTimes=map||{};
-  }
-  predict(nowSec,reverse){
-    const d=this.data,adjNow=nowSec-TIME_OFFSET,order=this.stationOrder(reverse);
-    let res=[],inTransit=0;
-
-    // 检查是否有高德注入的班次时间
-    const hasGaode=Object.keys(this._gaodeTimes).length>0;
-
-    if(hasGaode){
-      // 高德模式：完全使用注入的绝对到站时间，不做本地推算
-      for(let i=0;i<order.length;i++){
-        const arr=[];
-        const stnIdx=order[i].i;
-        const gTimes=this._gaodeTimes[stnIdx];
-        if(gTimes&&gTimes.length>0){
-          for(let j=0;j<gTimes.length;j++){
-            const s=gTimes[j]-adjNow;
-            if(s>=-d.dwell&&s<5400) arr.push({s,gaode:true});
-          }
-          arr.sort((a,b)=>a.s-b.s);
-          if(arr.length>0) inTransit++;
-        }
-        res.push(arr);
-      }
-    }else{
-      // 本地推算模式（无高德Key时）
-      let trains=[];
-      let t0=d.firstTrain*60;
-      while(t0<=d.lastTrain*60){
-        let trainEnd=t0+this.totalCycle;
-        if(t0<=adjNow&&trainEnd+d.dwell*2>adjNow) inTransit++;
-        if(adjNow-(d.dwell*2)<trainEnd+d.dwell) trains.push(t0);
-        t0+=this.intervalAt(t0);
-      }
-      for(let i=0;i<order.length;i++){
-        const arr=[];
-        const stnIdx=order[i].i;
-        const off=this.stationOffset(stnIdx,reverse);
-        for(let j=0;j<trains.length;j++){
-          const s=trains[j]+off-adjNow;
-          if(s>=-d.dwell*2&&s<5400) arr.push({s});
-        }
-        res.push(arr);
-      }
-    }
-
-    const isOp=nowSec>=d.firstTrain*60&&nowSec<=d.lastTrain*60+this.totalCycle;
-    return{a:res,op:isOp,c:inTransit||(isOp?1:0),order};
-  }
+  constructor(n){this.name=n;this.data=LINES[n];this.cum=LINE_CUM[n];this.totalCycle=this.cum[this.cum.length-1]}
+  intervalAt(t0){const m=t0/60;return((m>=420&&m<=540)||(m>=1020&&m<=1140))?this.data.peakInterval:this.data.offpeakInterval}
+  stationOffset(idx,reverse){return reverse?this.totalCycle-this.cum[idx]:this.cum[idx]}
+  stationOrder(reverse){var stns=this.data.stations;if(reverse){var rev=[];for(var i=stns.length-1;i>=0;i--)rev.push({s:stns[i],i:i});return rev}return stns.map(function(s,i){return{s:s,i:i}})}
+  predict(nowSec,reverse){const d=this.data,adjNow=nowSec-TIME_OFFSET,order=this.stationOrder(reverse);let trains=[],inTransit=0,res=[];let t0=d.firstTrain*60;while(t0<=d.lastTrain*60){let trainEnd=t0+this.totalCycle;if(t0<=adjNow&&trainEnd+d.dwell>adjNow)inTransit++;if(adjNow-3600<trainEnd+d.dwell)trains.push(t0);t0+=this.intervalAt(t0)}for(let i=0;i<order.length;i++){const arr=[];const off=this.stationOffset(order[i].i,reverse);for(let j=0;j<trains.length;j++){const s=trains[j]+off-adjNow;if(s>-d.dwell&&s<3600)arr.push({s:s})}res.push(arr)}const isOp=nowSec>=d.firstTrain*60&&nowSec<=d.lastTrain*60+this.totalCycle;return{a:res,op:isOp,c:inTransit||(isOp?1:0),order:order}}
 }
 
-/* ─────────────────────────────────────────────
-   换乘到站查询（给换乘badge使用）
-───────────────────────────────────────────── */
-function nextArrivals(lineName,stationName,reverse,nowSec){
-  const td=LINES[lineName];if(!td)return{op:false,times:[]};
-  const tc=LINE_CUM[lineName],si=td.stations.findIndex(s=>s.n===stationName);
-  if(si<0)return{op:false,times:[]};
-  const total=tc[tc.length-1],offset=reverse?total-tc[si]:tc[si];
-  const adjNow=nowSec-TIME_OFFSET,isOp=nowSec>=td.firstTrain*60&&nowSec<=td.lastTrain*60+total,times=[];
-  let t0=td.firstTrain*60;
-  while(t0<=td.lastTrain*60&&times.length<2){
-    const sec=t0+offset-adjNow;
-    if(sec>=-td.dwell&&sec<5400) times.push(sec);
-    const m=t0/60,iv=((m>=420&&m<=540)||(m>=1020&&m<=1140))?td.peakInterval:td.offpeakInterval;
-    t0+=iv;
-  }
-  return{op:isOp,times};
-}
+function nextArrivals(lineName,stationName,reverse,nowSec){const td=LINES[lineName];if(!td)return{op:false,times:[]};const tc=LINE_CUM[lineName],si=td.stations.findIndex(s=>s.n===stationName);if(si<0)return{op:false,times:[]};const total=tc[tc.length-1],offset=reverse?total-tc[si]:tc[si],adjNow=nowSec-TIME_OFFSET,isOp=nowSec>=td.firstTrain*60&&nowSec<=td.lastTrain*60+total,times=[];let t0=td.firstTrain*60;while(t0<=td.lastTrain*60&&times.length<2){const sec=t0+offset-adjNow;if(sec>-td.dwell&&sec<3600)times.push(sec);const m=t0/60,iv=((m>=420&&m<=540)||(m>=1020&&m<=1140))?td.peakInterval:td.offpeakInterval;t0+=iv}return{op:isOp,times:times}}
 
-function getTransferBoth(tr,sn,nowSec){
-  const td=LINES[tr];if(!td)return{op:false,rows:[]};
-  if(td.stations.findIndex(s=>s.n===sn)<0)return{op:false,rows:[{dir:td.to,time:null}]};
-  const f=nextArrivals(tr,sn,false,nowSec),r=nextArrivals(tr,sn,true,nowSec),circ=td.from===td.to;
-  return{op:f.op||r.op,rows:[{dir:circ?'内环':td.to,time:f.times[0]??null},{dir:circ?'外环':td.from,time:r.times[0]??null}]};
-}
+function getTransferBoth(tr,sn,nowSec){const td=LINES[tr];if(!td)return{op:false,rows:[]};if(td.stations.findIndex(s=>s.n===sn)<0)return{op:false,rows:[{dir:td.to,time:null}]};const f=nextArrivals(tr,sn,false,nowSec),r=nextArrivals(tr,sn,true,nowSec),circ=td.from===td.to;return{op:f.op||r.op,rows:[{dir:circ?'鍐呯幆':td.to,time:f.times[0]??null},{dir:circ?'澶栫幆':td.from,time:r.times[0]??null}]}}
 
-function renderTransfer(s,nowSec){
-  if(!s.tr)return'';
-  const trD=getTransferBoth(s.tr,s.n,nowSec),bd='<span class="tr-badge" style="background:'+s.tc+'18;color:'+s.tc+';border:1px solid '+s.tc+'33">'+badgeContent(s.tr)+'</span>';
-  let rows='';
-  if(!trD.op){
-    rows='<div class="tr-info-row"><span class="tr-arrow">→</span><span class="tr-dir">换乘线</span><span class="tr-time" style="color:#3e4f6a">非运营</span></div>';
-  }else{
-    trD.rows.forEach(function(r){
-      const ts=r.time===null?{text:'暂无班次',color:'#3e4f6a'}:
-                r.time<1?{text:'进站中',color:'#fbbf24'}:
-                {text:fmt(r.time)+'后到达',color:timeState(r.time).color};
-      rows+='<div class="tr-info-row"><span class="tr-arrow">→</span><span class="tr-dir">'+escapeHtml(r.dir)+'</span><span class="tr-time" style="color:'+ts.color+'">'+ts.text+'</span></div>';
-    });
-  }
-  return'<div class="tr-group"><div class="tr-badge-col">'+bd+'</div><div class="tr-rows-col">'+rows+'</div></div>';
-}
+function renderTransfer(s,nowSec){if(!s.tr)return'';const trD=getTransferBoth(s.tr,s.n,nowSec),bd='<span class="tr-badge" style="background:'+s.tc+'18;color:'+s.tc+';border:1px solid '+s.tc+'33">'+badgeContent(s.tr)+'</span>';let rows='';if(!trD.op){rows='<div class="tr-info-row"><span class="tr-arrow">鈫?/span><span class="tr-dir">鎹箻绾?/span><span class="tr-time" style="color:#3e4f6a">闈炶繍钀?/span></div>'}else{trD.rows.forEach(function(r){const t=r.time===null?{text:'鏆傛棤鐝',color:'#3e4f6a'}:r.time<1?{text:'杩涚珯涓?,color:'#fbbf24'}:{text:fmt(r.time)+'鍚庡埌杈?,color:timeColor(r.time)};rows+='<div class="tr-info-row"><span class="tr-arrow">鈫?/span><span class="tr-dir">'+escapeHtml(r.dir)+'</span><span class="tr-time" style="color:'+t.color+'">'+t.text+'</span></div>'})}return'<div class="tr-group"><div class="tr-badge-col">'+bd+'</div><div class="tr-rows-col">'+rows+'</div></div>'}
 
-/* ─────────────────────────────────────────────
-   全量渲染：buildStations
-───────────────────────────────────────────── */
-function buildStations(){
-  const now=new Date(),nowSec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
-  const pred=engine.predict(nowSec,reverseDir),d=LINES[curLine],curR=hexRGB(d.color);
-  document.getElementById('offlineBanner').style.display=pred.op?'none':'block';
-  updateMeta(pred);
-  let html='';
-  for(let i=0;i<pred.order.length;i++){
-    const s=pred.order[i].s,arr=pred.a[i],hasTr=!!s.tr;
-    const trR=hasTr?hexRGB(s.tc):null,trHtml=renderTransfer(s,nowSec);
-    let rowCls='',rowStyle='',dotCls='dot',to=1,mt='--',mu='',mc='#7b8ba4',uc='#3e4f6a',nt='',tx='',txColor='';
+function mkBadge(s){return'<span class="tr-badge" style="background:'+s.tc+'18;color:'+s.tc+';border:1px solid '+s.tc+'33">'+badgeContent(s.tr)+'</span>'}
 
-    if(!arr||arr.length===0){
-      // 已过站
-      rowCls='row-passed';dotCls='dot dot-passed';to=0.35;
-    }else{
-      const first=arr[0],sec=Math.max(0,Math.ceil(first.s));
+function buildStations(){const now=new Date(),nowSec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();const pred=engine.predict(nowSec,reverseDir),d=LINES[curLine],curR=hexRGB(d.color);document.getElementById('offlineBanner').style.display=pred.op?'none':'block';updateMeta(pred);let html='';for(let i=0;i<pred.order.length;i++){const s=pred.order[i].s,arr=pred.a[i],hasTr=!!s.tr,trR=hasTr?hexRGB(s.tc):null,trHtml=renderTransfer(s,nowSec);let sc='',rs='',dc='',to=1,mt='--',mu='',mc='#7b8ba4',uc='#3e4f6a',nt='',tx='';if(!arr||arr.length===0){sc='row-passed';dc='dot-passed';to=.35}else{const first=arr[0],sec=Math.max(0,Math.ceil(first.s));if(first.s<=0&&first.s>-engine.data.dwell){sc='row-dwell';dc='dot-dwell';if(trR)rs='background:'+transferGrad(trR,'251,191,36')+';border:1px solid rgba('+trR+',.12)';else rs='background:'+singleGrad('251,191,36')+';border:1px solid rgba(251,191,36,.2)';mt='鍋滈潬涓?;mc='#fbbf24';uc='#fbbf24'}else if(sec>0&&sec<=30){sc='row-arriving';dc='dot-arriving';if(trR)rs='background:'+transferGrad(trR,curR)+';border:1px solid rgba('+trR+',.12)';else rs='background:'+singleGrad(curR)+';border:1px solid rgba('+curR+',.2)';mt=fmt(sec);mu='鍒拌揪';mc='#e8384f';uc='#e8384f';tx='鍗冲皢鍒扮珯'}else{mt=fmt(sec);mu='鍒拌揪';mc=timeColor(sec);uc='#3e4f6a'}if(arr.length>1&&arr[1].s>0)nt=fmt(arr[1].s)}const ut=mu?'<span class="t-unit" style="color:'+uc+'">'+mu+'</span>':'',nx=nt?'<span class="t-next">涓嬩竴鐝?'+nt+'</span>':'',sx=tx?'<div class="t-hint">'+tx+'</div>':'';html+='<div class="row '+(hasTr?'row-has-tr ':'')+sc+'" style="'+rs+';animation-delay:'+i*40+'ms"><div class="dot-col"><div class="dot '+dc+'"><span></span><span></span><span></span></div></div><div class="name-col"><div class="name-line"><span class="st-name">'+escapeHtml(s.n)+'</span></div>'+trHtml+'</div><div class="times-col" style="opacity:'+to+'"><div class="t-main"><span class="t-val" style="color:'+mc+'">'+mt+'</span>'+ut+'</div>'+sx+nx+'</div></div>'}document.getElementById('stationCard').innerHTML=html}
 
-      if(first.s<0&&first.s>=-engine.data.dwell*2){
-        // 停靠中 → 浮动框处理视觉，行只设背景
-        rowCls='row-dwell';
-        dotCls='dot dot-dwell';
-        rowStyle='';
-        mt='停靠中';mc='#fbbf24';uc='#fbbf24';
+let curLine='1鍙风嚎',engine=new Engine(curLine),lastSec=-1,reverseDir=false,TIME_OFFSET=getOffset();
+let AMAP_KEY=localStorage.getItem('amap_key')||'61c201b7cbf1acc2931f6369bb15d9e1',GAODE_STATUS=AMAP_KEY?'楂樺痉寰呮牎鍑?:'鏈湴鎺ㄧ畻',GAODE_SYNCED=false,GAODE_TIMER=null;
+const GAODE_TTL=60*1000;
 
-      }else if(sec>0&&sec<=30){
-        // 即将到站（≤30s）
-        rowCls='row-arriving';
-        dotCls='dot dot-arriving';
-        rowStyle='';
-        mt=fmt(sec);mu='到达';mc='#e8384f';uc='#e8384f';
-        tx='即将到站';txColor='#e8384f';
+function updateMeta(pred){document.getElementById('meta').textContent=(pred.op?pred.c+' 鍒楀湪閫?:'闈炶繍钀ユ椂娈?)+' 路 '+GAODE_STATUS}
+function promptAmapKey(){var k=prompt('杈撳叆楂樺痉寮€鏀惧钩鍙?Web鏈嶅姟 Key锛歕n浠呬繚瀛樺湪 local锛屼笉鍐欏叆婧愮爜銆?);if(k){AMAP_KEY=k.trim();localStorage.setItem('amap_key',AMAP_KEY);GAODE_STATUS='楂樺痉寰呮牎鍑?;syncGaode(true)}}
 
-      }else if(sec>30&&sec<=150){
-        // 快到站（≤2.5min）→ 浮动框接管
-        rowCls='row-soon';
-        dotCls='dot dot-soon';
-        rowStyle='';
-        mt=fmt(sec);mu='到达';mc='#fbbf24';uc='#fbbf24';
-        tx='即将进站';txColor='#fbbf24';
+function toggleDirection(){reverseDir=!reverseDir;const card=document.getElementById('stationCard');card.style.opacity='0';setTimeout(()=>{buildStations();updateDir();card.style.opacity='1';window.scrollTo({top:0,behavior:'smooth'});syncGaode(false)},200)}
 
-      }else{
-        // 正常
-        mt=fmt(sec);mu='到达';
-        const ts=timeState(sec);
-        mc=ts.color;uc='#3e4f6a';
-      }
+function getOffset(){var v=parseInt(localStorage.getItem('mfe_offset'));if(isNaN(v)||v>600||v<-600){v=-90;localStorage.removeItem('mfe_offset')}return v}
 
-      if(arr.length>1&&arr[1].s>0) nt=fmt(arr[1].s);
-    }
+function renderTabs(){document.getElementById('lineTabs').innerHTML=Object.keys(LINES).map(name=>{const d=LINES[name];return'<div class="tab '+(name===curLine?'active':'')+'" style="'+(name===curLine?'background:'+d.color+'22;color:'+d.color+';border-color:'+d.color+'33':'')+'" onclick="switchLine(\''+name+'\')"><span class="dot" style="background:'+d.color+'"></span>'+name+'</div>'}).join('')}
 
-    const ut=mu?'<span class="t-unit" style="color:'+uc+'">'+mu+'</span>':'';
-    const nx=nt?'<span class="t-next">下一班 '+nt+'</span>':'';
-    const sx=tx?'<div class="t-hint" style="color:'+txColor+'">'+tx+'</div>':'';
-    html+='<div class="row '+(hasTr?'row-has-tr ':'')+rowCls+'" style="'+rowStyle+';animation-delay:'+i*35+'ms">'
-      +'<div class="dot-col"><div class="'+dotCls+'"><span></span><span></span><span></span></div></div>'
-      +'<div class="name-col"><div class="name-line"><span class="st-name">'+escapeHtml(s.n)+'</span></div>'+trHtml+'</div>'
-      +'<div class="times-col" style="opacity:'+to+'">'
-      +'<div class="t-main"><span class="t-val" style="color:'+mc+'">'+mt+'</span>'+ut+'</div>'
-      +sx+nx+'</div></div>';
-  }
-  document.getElementById('stationCard').innerHTML=html+'<div class="train-marker" id="trainMarker"></div>';
-  // 延迟一帧让DOM渲染后再定位框
-  requestAnimationFrame(()=>updateTrainMarker(pred));
-}
+function updateDir(){const d=LINES[curLine];const rf=reverseDir?d.to:d.from;const rt=reverseDir?d.from:d.to;const bar=document.getElementById('dirBar');bar.innerHTML='<div class="dir-content"><span class="dir-from">'+escapeHtml(rf)+'</span><span class="dir-arrow">鈫?/span><span class="dir-to">'+escapeHtml(rt)+'</span></div><span class="dir-tag">'+d.stations.length+'绔?/span>';bar.onclick=toggleDirection;bar.style.cursor='pointer'}
 
-/* ─────────────────────────────────────────────
-   增量更新（每秒 tick 用）：updateTick
-   列车位置浮动大框由 updateTrainMarker 统一管理
-───────────────────────────────────────────── */
-function updateTick(){
-  const now=new Date(),nowSec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
-  const pred=engine.predict(nowSec,reverseDir);
-  document.getElementById('offlineBanner').style.display=pred.op?'none':'block';
-  updateMeta(pred);
-
-  const rows=document.querySelectorAll('#stationCard .row');
-  for(let i=0;i<pred.order.length&&i<rows.length;i++){
-    const s=pred.order[i].s,arr=pred.a[i],row=rows[i];
-    const hasTr=!!s.tr;
-
-    // 更新换乘信息
-    if(hasTr){const tg=row.querySelector('.tr-group');if(tg)tg.outerHTML=renderTransfer(s,nowSec)}
-
-    const vE=row.querySelector('.t-val'),uE=row.querySelector('.t-unit'),nE=row.querySelector('.t-next'),sE=row.querySelector('.t-hint');
-
-    if(!arr||arr.length===0){
-      _setRowClass(row,'row-passed',hasTr);
-      const dEl=row.querySelector('.dot');if(dEl)dEl.className='dot dot-passed';
-      if(vE)vE.textContent='--';if(uE)uE.textContent='';if(sE)sE.remove();
-      continue;
-    }
-
-    const first=arr[0],sec=Math.max(0,Math.ceil(first.s));
-
-    if(first.s<0&&first.s>=-engine.data.dwell*2){
-      // 停靠中
-      _setRowClass(row,'row-dwell',hasTr);
-      const dEl=row.querySelector('.dot');if(dEl)dEl.className='dot dot-dwell';
-      if(vE){vE.textContent='停靠中';vE.style.color='#fbbf24'}
-      if(uE)uE.textContent='';if(sE)sE.remove();
-
-    }else if(sec>0&&sec<=30){
-      // 即将到站 ≤30s
-      _setRowClass(row,'row-arriving',hasTr);
-      const dEl=row.querySelector('.dot');if(dEl)dEl.className='dot dot-arriving';
-      if(vE){vE.textContent=fmt(sec);vE.style.color='#e8384f'}
-      if(uE){uE.textContent='到达';uE.style.color='#e8384f'}
-      _ensureHint(row,'即将到站','#e8384f');
-
-    }else if(sec>30&&sec<=150){
-      // 快到站 ≤2.5min
-      _setRowClass(row,'row-soon',hasTr);
-      const dEl=row.querySelector('.dot');if(dEl)dEl.className='dot dot-soon';
-      if(vE){vE.textContent=fmt(sec);vE.style.color='#fbbf24'}
-      if(uE){uE.textContent='到达';uE.style.color='#fbbf24'}
-      _ensureHint(row,'即将进站','#fbbf24');
-
-    }else{
-      // 正常等待
-      _setRowClass(row,'',hasTr);
-      const dEl=row.querySelector('.dot');if(dEl)dEl.className='dot';
-      if(vE){vE.textContent=fmt(sec);vE.style.color=timeState(sec).color}
-      if(uE){uE.textContent='到达';uE.style.color='#3e4f6a'}
-      if(sE)sE.remove();
-    }
-
-    if(nE) nE.textContent=(arr.length>1&&arr[1].s>0)?'下一班 '+fmt(arr[1].s):'';
-  }
-
-  // 更新列车位置浮动框
-  updateTrainMarker(pred);
-}
-
-function _setRowClass(row,cls,hasTr){
-  row.className='row'+(hasTr?' row-has-tr':'')+(cls?' '+cls:'');
-}
-
-function _ensureHint(row,text,color){
-  let hint=row.querySelector('.t-hint');
-  if(!hint){
-    hint=document.createElement('div');
-    hint.className='t-hint';
-    const tc=row.querySelector('.times-col');
-    if(tc){const nn=tc.querySelector('.t-next');if(nn)tc.insertBefore(hint,nn);else tc.appendChild(hint);}
-  }
-  hint.style.color=color;
-  hint.textContent=text;
-}
-
-/* ─────────────────────────────────────────────
-   列车位置浮动大框
-   逻辑：
-   1. 找到第一辆活跃列车所在位置
-   2. 若停靠中 (s<0)：框只覆盖该站
-   3. 若即将进站 (0<s≤150)：框同时覆盖上一站和本站
-      （表示列车在两站之间移动）
-   4. 每秒通过 CSS transition 平滑过渡
-───────────────────────────────────────────── */
-function updateTrainMarker(pred){
-  const marker=document.getElementById('trainMarker');
-  if(!marker)return;
-  const card=document.getElementById('stationCard');
-  const rows=card.querySelectorAll('.row');
-  if(!rows.length){marker.classList.remove('show','yellow','red','pulse');return}
-
-  // 找"同一辆车"所在位置：
-  // 从第一站往最后一站遍历，找到 s 在 0~150 的站
-  // 同时验证上一站的 s 是负数（列车刚离开），确保是同一辆车
-  let activeIdx=-1, activeS=999;
-  for(let i=0;i<pred.order.length;i++){
-    const arr=pred.a[i];
-    if(!arr||!arr.length)continue;
-    const s=arr[0].s;
-    if(s>0&&s<=150&&s<activeS){activeIdx=i;activeS=s}
-  }
-
-  if(activeIdx<0){
-    marker.classList.remove('show','yellow','red','pulse');
-    return;
-  }
-
-  const cardRect=card.getBoundingClientRect();
-  const activeRect=rows[activeIdx].getBoundingClientRect();
-  const isArriving=(activeS>0&&activeS<=30);
-
-  // 关键修复：检查上一站是否是同一辆车刚离开（s 为负数）
-  const prevIdx=activeIdx-1;
-  let spanTwo=false;
-  if(prevIdx>=0){
-    const prevArr=pred.a[prevIdx];
-    if(prevArr&&prevArr.length&&prevArr[0].s<0&&prevArr[0].s>-300){
-      // 上一站的 s 是负数 → 同一辆车刚从那站离开 → 连框两站
-      spanTwo=true;
-      const prevRect=rows[prevIdx].getBoundingClientRect();
-      const spanTop=Math.min(prevRect.top,activeRect.top)-cardRect.top-2;
-      const spanBottom=Math.max(prevRect.bottom,activeRect.bottom)-cardRect.top+2;
-      marker.style.top=spanTop+'px';
-      marker.style.height=(spanBottom-spanTop)+'px';
-    }
-  }
-  if(!spanTwo){
-    // 不同车辆或首站，框只覆盖本站
-    marker.style.top=(activeRect.top-cardRect.top-2)+'px';
-    marker.style.height=(activeRect.height+4)+'px';
-  }
-
-  if(isArriving){
-    marker.className='train-marker show red';
-  }else{
-    marker.className='train-marker show yellow';
-  }
-}
-
-/* ─────────────────────────────────────────────
-   高德实时班次对接（v2.2 升级）
-   策略：
-   1. 通过公交路线规划 API 拿到地铁段，解析每节车次的出发/到达时间
-   2. 转换为每站的绝对到站时刻注入 engine._gaodeTimes
-   3. 有 Key 才启用；无 Key 用本地推算
-   注意：高德公交路线 /integrated 接口返回的 departure_time 是
-         当次班次从该站出发的时刻（Unix 时间戳），此为权威班次时刻。
-───────────────────────────────────────────── */
-let curLine='1号线',engine=new Engine(curLine),lastSec=-1,reverseDir=false,TIME_OFFSET=getOffset();
-let AMAP_KEY=localStorage.getItem('amap_key')||'';
-let GAODE_STATUS=AMAP_KEY?'高德待同步':'本地推算';
-let GAODE_TIMER=null;
-const GAODE_TTL=60*1000; // 60秒刷新，保持实时性
-
-function updateMeta(pred){
-  document.getElementById('meta').textContent=(pred.op?pred.c+' 列在途':'非运营时段')+' · '+GAODE_STATUS;
-}
-
-function promptAmapKey(){
-  var k=prompt('输入高德开放平台 Web服务 Key：\n接入后将完全使用高德实时班次数据。');
-  if(k){AMAP_KEY=k.trim();localStorage.setItem('amap_key',AMAP_KEY);GAODE_STATUS='高德同步中…';syncGaode(true);}
-}
-
-function toggleDirection(){
-  reverseDir=!reverseDir;
-  const card=document.getElementById('stationCard');
-  card.style.opacity='0';
-  setTimeout(()=>{buildStations();updateDir();card.style.opacity='1';window.scrollTo({top:0,behavior:'smooth'});syncGaode(false);},200);
-}
-
-function getOffset(){
-  var v=parseInt(localStorage.getItem('mfe_offset'));
-  if(isNaN(v)||v>600||v<-600){v=-90;localStorage.removeItem('mfe_offset');}
-  return v;
-}
-
-function renderTabs(){
-  document.getElementById('lineTabs').innerHTML=Object.keys(LINES).map(name=>{
-    const d=LINES[name];
-    return'<div class="tab '+(name===curLine?'active':'')+'" style="'+(name===curLine?'background:'+d.color+'22;color:'+d.color+';border-color:'+d.color+'33':'')+'" onclick="switchLine(\''+name+'\')"><span class="dot" style="background:'+d.color+'"></span>'+name+'</div>';
-  }).join('');
-}
-
-function updateDir(){
-  const d=LINES[curLine];
-  const rf=reverseDir?d.to:d.from,rt=reverseDir?d.from:d.to;
-  const bar=document.getElementById('dirBar');
-  bar.innerHTML='<div class="dir-content"><span class="dir-from">'+escapeHtml(rf)+'</span><span class="dir-arrow">→</span><span class="dir-to">'+escapeHtml(rt)+'</span></div><span class="dir-tag">'+d.stations.length+'站</span>';
-  bar.onclick=toggleDirection;bar.style.cursor='pointer';
-}
-
-/* ── 缓存工具 ── */
+function stationQuery(name){return'閮戝窞甯?'+name.replace(/[锛?].*?[锛?]/g,'')+' 鍦伴搧绔?}
 function cacheGet(k,ttl){try{var o=JSON.parse(localStorage.getItem(k)||'null');if(o&&Date.now()-o.ts<ttl)return o.v}catch(e){}return null}
 function cacheSet(k,v){try{localStorage.setItem(k,JSON.stringify({ts:Date.now(),v:v}))}catch(e){}}
+function geocodeStation(name){var ck='geo_'+name,c=cacheGet(ck,30*24*3600*1000);if(c)return Promise.resolve(c);var url='https://restapi.amap.com/v3/geocode/geo?city=閮戝窞&address='+encodeURIComponent(stationQuery(name))+'&key='+encodeURIComponent(AMAP_KEY);return fetch(url).then(r=>r.json()).then(function(data){var loc=data&&data.status==='1'&&data.geocodes&&data.geocodes[0]&&data.geocodes[0].location;if(loc)cacheSet(ck,loc);return loc||null})}
+function normStation(n){return String(n||'').replace(/[路\s]/g,'').replace(/鍦伴搧绔?/,'').replace(/[锛?].*?[锛?]/g,'')}
+function stationIndex(stns,n){var nn=normStation(n),exact=stns.findIndex(s=>normStation(s.n)===nn);if(exact>=0)return exact;return stns.findIndex(s=>nn.indexOf(normStation(s.n))>=0||normStation(s.n).indexOf(nn)>=0)}
+function applyGaodeSegments(segs){var d=LINES[curLine],stns=d.stations,changed=false;if(!segs||!segs.length)return false;segs.forEach(function(sg){var fi=stationIndex(stns,sg.f),ti=stationIndex(stns,sg.t);if(reverseDir){var tmp=fi;fi=ti;ti=tmp}if(fi>=0&&ti>fi&&sg.d>0){var per=Math.round(sg.d/(ti-fi));for(var k=fi+1;k<=ti;k++){var next=stns[k-1].t+per;if(Math.abs(stns[k].t-next)>5){stns[k].t=next;changed=true}}}});if(changed){var c=[0];for(var i=1;i<stns.length;i++)c.push(c[i-1]+(stns[i].t-stns[i-1].t)+d.dwell);LINE_CUM[curLine]=c;engine=new Engine(curLine)}return changed}
 
-/* ── 站名归一化（匹配高德返回的站名） ── */
-function normStation(n){return String(n||'').replace(/[·\s]/g,'').replace(/地铁站$/,'').replace(/[（(].*?[）)]/g,'')}
-function stationIndex(stns,n){
-  var nn=normStation(n);
-  var exact=stns.findIndex(s=>normStation(s.n)===nn);
-  if(exact>=0)return exact;
-  return stns.findIndex(s=>nn.indexOf(normStation(s.n))>=0||normStation(s.n).indexOf(nn)>=0);
-}
+function syncGaode(force){if(!AMAP_KEY){GAODE_STATUS='鏈湴鎺ㄧ畻';updateMeta(engine.predict(new Date().getHours()*3600+new Date().getMinutes()*60+new Date().getSeconds(),reverseDir));return Promise.resolve(false)}var d=LINES[curLine];if(d.from===d.to){GAODE_STATUS='鐜嚎鏈湴鎺ㄧ畻';buildStations();return Promise.resolve(false)}var rf=reverseDir?d.to:d.from,rt=reverseDir?d.from:d.to,ck='gaode_'+curLine+'_'+(reverseDir?'r':'f'),cached=!force&&cacheGet(ck,GAODE_TTL);if(cached){applyGaodeSegments(cached);GAODE_STATUS='楂樺痉宸叉牎鍑?;GAODE_SYNCED=true;buildStations();return Promise.resolve(true)}GAODE_STATUS='楂樺痉鍚屾涓?;buildStations();return Promise.all([geocodeStation(rf),geocodeStation(rt)]).then(function(pos){if(!pos[0]||!pos[1])throw new Error('瀹氫綅澶辫触');var url='https://restapi.amap.com/v3/direction/transit/integrated?origin='+encodeURIComponent(pos[0])+'&destination='+encodeURIComponent(pos[1])+'&city=0371&strategy=0&key='+encodeURIComponent(AMAP_KEY);return fetch(url)}).then(r=>r.json()).then(function(data){if(!data||data.status!=='1')throw new Error(data&&data.info||'鍚屾澶辫触');var segs=[];(data.route&&data.route.transits||[]).some(function(t){(t.segments||[]).forEach(function(s){(s.bus&&s.bus.buslines||[]).forEach(function(bl){if(bl.type&&bl.type.indexOf('鍦伴搧')>-1){var d2=parseInt(bl.duration,10);if(d2>0)segs.push({f:bl.departure_stop.name,t:bl.arrival_stop.name,d:d2})}})});return segs.length>0});if(!segs.length)throw new Error('鏃犲湴閾佹柟妗?);cacheSet(ck,segs);applyGaodeSegments(segs);GAODE_STATUS='楂樺痉宸叉牎鍑?;GAODE_SYNCED=true;buildStations();return true}).catch(function(e){GAODE_STATUS='楂樺痉鍚屾寮傚父';buildStations();return false})}
 
-/* ── geocode 缓存 ── */
-function geocodeStation(name){
-  var ck='geo2_'+name,c=cacheGet(ck,30*24*3600*1000);
-  if(c)return Promise.resolve(c);
-  var q='郑州市 '+name.replace(/[（(].*?[）)]/g,'')+' 地铁站';
-  var url='https://restapi.amap.com/v3/geocode/geo?city=0371&address='+encodeURIComponent(q)+'&key='+encodeURIComponent(AMAP_KEY);
-  return fetch(url).then(r=>r.json()).then(function(data){
-    var loc=data&&data.status==='1'&&data.geocodes&&data.geocodes[0]&&data.geocodes[0].location;
-    if(loc)cacheSet(ck,loc);
-    return loc||null;
-  });
-}
+function scheduleGaode(){if(GAODE_TIMER)clearInterval(GAODE_TIMER);GAODE_TIMER=setInterval(function(){syncGaode(false)},GAODE_TTL);setTimeout(function(){syncGaode(false)},800)}
 
-/**
- * syncGaode — 核心升级版
- * 逻辑：
- *  1. 获取起/终点坐标
- *  2. 调用高德公交路线规划接口（获取当前时段最近的班次时刻）
- *  3. 解析地铁段的 departure_time，推算各站到站绝对时刻
- *  4. 注入 engine._gaodeTimes 并重建显示
- *
- * 高德公交路线规划接口：
- *   /v3/direction/transit/integrated
- *   返回 transit.segments[].bus.buslines[].{departure_stop, arrival_stop, duration, departure_time, arrival_time}
- *   departure_time / arrival_time 为 Unix 时间戳（秒）
- */
-function syncGaode(force){
-  if(!AMAP_KEY){GAODE_STATUS='本地推算';updateMeta(engine.predict(new Date().getHours()*3600+new Date().getMinutes()*60+new Date().getSeconds(),reverseDir));return Promise.resolve(false);}
-  const d=LINES[curLine];
-  if(d.from===d.to){GAODE_STATUS='环线本地推算';buildStations();return Promise.resolve(false);}
+function tick(){const now=new Date(),sec=now.getSeconds();if(sec!==lastSec){lastSec=sec;var ts=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');document.getElementById('clock').textContent=ts;var c2=document.getElementById('clock2');if(c2)c2.textContent=ts;try{updateTick()}catch(e){}}setTimeout(tick,Math.max(10,1010-now.getMilliseconds()))}
 
-  const rf=reverseDir?d.to:d.from,rt=reverseDir?d.from:d.to;
-  const ck='gaode2_'+curLine+'_'+(reverseDir?'r':'f');
-  const cached=!force&&cacheGet(ck,GAODE_TTL);
-  if(cached){
-    _applyGaodeTimetable(cached);
-    GAODE_STATUS='高德已校准';
-    buildStations();
-    return Promise.resolve(true);
-  }
+function updateTick(){const now=new Date(),nowSec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds(),pred=engine.predict(nowSec,reverseDir);document.getElementById('offlineBanner').style.display=pred.op?'none':'block';updateMeta(pred);const rows=document.querySelectorAll('#stationCard .row');for(let i=0;i<pred.order.length&&i<rows.length;i++){const s=pred.order[i].s,arr=pred.a[i];if(s.tr){var tg=rows[i].querySelector('.tr-group');if(tg)tg.outerHTML=renderTransfer(s,nowSec)}const vE=rows[i].querySelector('.t-val'),uE=rows[i].querySelector('.t-unit'),nE=rows[i].querySelector('.t-next'),sE=rows[i].querySelector('.t-hint');if(!arr||arr.length===0){if(vE)vE.textContent='--';if(sE)sE.remove();continue}const first=arr[0],sec=Math.max(0,Math.ceil(first.s));if(first.s<=0&&first.s>-engine.data.dwell){if(vE){vE.textContent='鍋滈潬涓?;vE.style.color='#fbbf24'}if(uE)uE.textContent='';if(sE)sE.remove()}else if(sec>0&&sec<=30){if(vE){vE.textContent=fmt(sec);vE.style.color='#e8384f'}if(uE){uE.textContent='鍒拌揪';uE.style.color='#e8384f'}if(!sE){var ns=document.createElement('div');ns.className='t-hint';ns.style.cssText='font-size:11px;color:#e8384f;font-weight:600;text-align:right;margin-top:2px';var tc=rows[i].querySelector('.times-col');if(tc){var nn=tc.querySelector('.t-next');if(nn)tc.insertBefore(ns,nn);else tc.appendChild(ns)}ns.textContent='鍗冲皢鍒扮珯'}}else{if(vE){vE.textContent=fmt(sec);vE.style.color=timeColor(sec)}if(uE){uE.textContent='鍒拌揪';uE.style.color='#3e4f6a'}if(sE)sE.remove()}if(nE)nE.textContent=(arr.length>1&&arr[1].s>0)?'涓嬩竴鐝?'+fmt(arr[1].s):''}}
 
-  GAODE_STATUS='高德同步中…';
-  updateMeta(engine.predict(new Date().getHours()*3600+new Date().getMinutes()*60+new Date().getSeconds(),reverseDir));
+function switchLine(name){if(name===curLine)return;const card=document.getElementById('stationCard');card.style.opacity='0';setTimeout(()=>{curLine=name;reverseDir=false;engine=new Engine(curLine);renderTabs();updateDir();buildStations();card.style.opacity='1';window.scrollTo({top:0,behavior:'smooth'});syncGaode(false)},200)}
 
-  return Promise.all([geocodeStation(rf),geocodeStation(rt)])
-    .then(function(pos){
-      if(!pos[0]||!pos[1])throw new Error('定位失败');
-      // 使用当前时间作为出发时间，拿最近班次
-      const now=Math.floor(Date.now()/1000);
-      var url='https://restapi.amap.com/v3/direction/transit/integrated'
-        +'?origin='+encodeURIComponent(pos[0])
-        +'&destination='+encodeURIComponent(pos[1])
-        +'&city=0371&cityd=0371&strategy=0'
-        +'&time='+now
-        +'&key='+encodeURIComponent(AMAP_KEY);
-      return fetch(url);
-    })
-    .then(r=>r.json())
-    .then(function(data){
-      if(!data||data.status!=='1')throw new Error(data&&data.info||'高德请求失败');
-      // 解析班次时刻
-      const timetable=_parseGaodeTimetable(data,d.stations);
-      if(!timetable)throw new Error('未找到地铁方案');
-      cacheSet(ck,timetable);
-      _applyGaodeTimetable(timetable);
-      GAODE_STATUS='高德已校准';
-      buildStations();
-      return true;
-    })
-    .catch(function(e){
-      console.warn('[Gaode]',e.message);
-      GAODE_STATUS='高德同步失败';
-      engine.injectGaodeTimes({});
-      buildStations();
-      return false;
-    });
-}
-
-/**
- * 解析高德公交路线数据，提取地铁段班次时刻
- * 返回结构：{ stationIdx: [absArrivalSec_from_midnight, ...] }
- *   absArrivalSec = (Unix时间戳 % 86400)  以当天零点为基准
- */
-function _parseGaodeTimetable(data,stns){
-  const result={};
-  const transits=(data.route&&data.route.transits)||[];
-  let found=false;
-  for(let ti=0;ti<transits.length;ti++){
-    const transit=transits[ti];
-    const segs=(transit.segments)||[];
-    for(let si=0;si<segs.length;si++){
-      const bus=segs[si].bus;
-      if(!bus)continue;
-      const buslines=bus.buslines||[];
-      for(let bi=0;bi<buslines.length;bi++){
-        const bl=buslines[bi];
-        if(!bl.type||bl.type.indexOf('地铁')<0)continue;
-        // 解析出发站和到达站的时刻
-        const depTime=parseInt(bl.departure_time,10)||0;
-        const arrTime=parseInt(bl.arrival_time,10)||0;
-        if(!depTime||!arrTime)continue;
-        found=true;
-        // 出发站
-        const depStopName=bl.departure_stop&&bl.departure_stop.name;
-        // 到达站
-        const arrStopName=bl.arrival_stop&&bl.arrival_stop.name;
-        if(depStopName){
-          const idx=stationIndex(stns,depStopName);
-          if(idx>=0){
-            const sec=depTime%86400;
-            if(!result[idx])result[idx]=[];
-            if(!result[idx].includes(sec))result[idx].push(sec);
-          }
-        }
-        if(arrStopName){
-          const idx=stationIndex(stns,arrStopName);
-          if(idx>=0){
-            const sec=arrTime%86400;
-            if(!result[idx])result[idx]=[];
-            if(!result[idx].includes(sec))result[idx].push(sec);
-          }
-        }
-        // 中间站推算（利用站间时间差分布）
-        if(depStopName&&arrStopName&&depTime&&arrTime){
-          const depIdx=stationIndex(stns,depStopName);
-          const arrIdx=stationIndex(stns,arrStopName);
-          if(depIdx>=0&&arrIdx>depIdx){
-            const totalSec=arrTime-depTime;
-            const totalOff=LINE_CUM[curLine][arrIdx]-LINE_CUM[curLine][depIdx];
-            if(totalOff>0){
-              for(let k=depIdx+1;k<arrIdx;k++){
-                const ratio=(LINE_CUM[curLine][k]-LINE_CUM[curLine][depIdx])/totalOff;
-                const estSec=Math.round(depTime+ratio*totalSec)%86400;
-                if(!result[k])result[k]=[];
-                if(!result[k].includes(estSec))result[k].push(estSec);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return found?result:null;
-}
-
-/**
- * 将高德班次时刻注入 engine（仅注入，不修改本地时间表）
- */
-function _applyGaodeTimetable(timetable){
-  if(!timetable)return;
-  const stns=LINES[curLine].stations;
-  const mapped={};
-  Object.keys(timetable).forEach(function(k){
-    const ki=parseInt(k);
-    const realIdx=reverseDir?stns.length-1-ki:ki;
-    mapped[realIdx]=timetable[k];
-  });
-  engine.injectGaodeTimes(mapped);
-}
-
-function scheduleGaode(){
-  if(GAODE_TIMER)clearInterval(GAODE_TIMER);
-  GAODE_TIMER=setInterval(()=>syncGaode(true),GAODE_TTL);
-  setTimeout(()=>syncGaode(false),600);
-}
-
-/* ─────────────────────────────────────────────
-   主循环 tick
-───────────────────────────────────────────── */
-function tick(){
-  const now=new Date(),sec=now.getSeconds();
-  if(sec!==lastSec){
-    lastSec=sec;
-    var ts=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
-    document.getElementById('clock').textContent=ts;
-    var c2=document.getElementById('clock2');if(c2)c2.textContent=ts;
-    try{updateTick();}catch(e){console.error(e);}
-  }
-  setTimeout(tick,Math.max(10,1010-now.getMilliseconds()));
-}
-
-/* ─────────────────────────────────────────────
-   页面切换 / 导航
-───────────────────────────────────────────── */
-function switchLine(name){
-  if(name===curLine)return;
-  const card=document.getElementById('stationCard');
-  card.style.opacity='0';
-  setTimeout(()=>{
-    curLine=name;reverseDir=false;
-    // 重建时清除高德注入
-    const newEng=new Engine(curLine);
-    engine=newEng;
-    renderTabs();updateDir();buildStations();
-    card.style.opacity='1';
-    window.scrollTo({top:0,behavior:'smooth'});
-    syncGaode(false);
-  },200);
-}
-function switchTab(tab){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.sub-page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+tab).classList.add('active');
-  var idx=tab==='metro'?0:tab==='notif-main'?1:2;
-  document.querySelectorAll('.tab-item')[idx].classList.add('active');
-}
-function showSubPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-}
-function goBack(){
-  document.querySelectorAll('.sub-page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-me').classList.add('active');
-  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-item')[2].classList.add('active');
-}
+function switchTab(tab){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.sub-page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+tab).classList.add('active');var idx=tab==='metro'?0:tab==='notif-main'?1:2;document.querySelectorAll('.tab-item')[idx].classList.add('active')}
+function showSubPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+name).classList.add('active')}
+function goBack(){document.querySelectorAll('.sub-page').forEach(p=>p.classList.remove('active'));document.getElementById('page-me').classList.add('active');document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-item')[2].classList.add('active')}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
-function submitBug(){
-  var tp=document.getElementById('bugType').value,ln=document.getElementById('bugLine').value,
-      ds=document.getElementById('bugDesc').value,ct=document.getElementById('bugContact').value;
-  var subj=encodeURIComponent('[郑州地铁App反馈] '+tp+' - '+ln);
-  var body=encodeURIComponent('反馈类型：'+tp+'\n涉及线路：'+ln+'\n问题描述：'+ds+'\n联系方式：'+ct+'\n\n---\n自动发送自 郑州地铁实时到站');
-  window.location.href='mailto:840892116@qq.com?subject='+subj+'&body='+body;
-  showToast('正在打开邮件客户端...');
-}
-
-/* ─────────────────────────────────────────────
-   通知数据
-───────────────────────────────────────────── */
-var NOTIFS=[
-  {tag:'新线开通',bg:'rgba(56,189,248,.12)',color:'#38bdf8',title:'7号线正式开通运营',desc:'郑州地铁7号线（东赵—南岗刘）于2024年12月29日正式开通运营，设站16座。',time:'2024-12-29'},
-  {tag:'新线开通',bg:'rgba(56,189,248,.12)',color:'#38bdf8',title:'8号线正式开通运营',desc:'郑州地铁8号线（天健湖—鲁庙）于2024年12月29日正式开通运营，设站28座。',time:'2024-12-29'},
-  {tag:'运营公告',bg:'rgba(232,56,79,.12)',color:'#e8384f',title:'元旦假期延时运营',desc:'为保障元旦假期乘客出行，各线路末班车延长运营30分钟。',time:'2025-01-01'},
-  {tag:'运营公告',bg:'rgba(232,56,79,.12)',color:'#e8384f',title:'1号线西三环站恢复运营',desc:'1号线西三环站站台改造施工已完成，即日起恢复正常运营。',time:'2025-03-15'},
-  {tag:'运营调整',bg:'rgba(251,191,36,.12)',color:'#fbbf24',title:'五一假期运营安排',desc:'五一期间（5月1日-5日）郑州地铁全线网延长运营时间30分钟。',time:'2025-04-28'},
-  {tag:'运营调整',bg:'rgba(251,191,36,.12)',color:'#fbbf24',title:'6号线一期全线贯通',desc:'6号线一期贾峪站至清华附中站全线贯通运营，设站28座。',time:'2024-11-30'},
-  {tag:'官方公告',bg:'rgba(167,139,250,.12)',color:'#a78bfa',title:'郑州地铁三期规划获批',desc:'第三期建设规划获批，新增7号线、8号线等线路。',time:'2024-10-15'},
-  {tag:'安全提示',bg:'rgba(239,68,68,.12)',color:'#ef4444',title:'地铁安检温馨提示',desc:'提醒广大乘客配合安检工作，严禁携带危险品进站乘车。',time:'2024-08-20'}
-];
-function fetchNotifs(){
-  var h='';
-  NOTIFS.forEach(function(n){h+='<div class="notif-card"><span class="n-tag" style="background:'+n.bg+';color:'+n.color+'">'+n.tag+'</span><div class="n-title">'+n.title+'</div><div class="n-desc">'+n.desc+'</div><div class="n-time">'+n.time+'</div></div>';});
-  document.getElementById('notifContent').innerHTML=h;
-}
+function submitBug(){var tp=document.getElementById('bugType').value;var ln=document.getElementById('bugLine').value;var ds=document.getElementById('bugDesc').value;var ct=document.getElementById('bugContact').value;var subj=encodeURIComponent('[閮戝窞鍦伴搧App鍙嶉] '+tp+' - '+ln);var body=encodeURIComponent('鍙嶉绫诲瀷锛?+tp+'\n娑夊強绾胯矾锛?+ln+'\n闂鎻忚堪锛?+ds+'\n鑱旂郴鏂瑰紡锛?+ct+'\n\n---\n鑷姩鍙戦€佽嚜 閮戝窞鍦伴搧瀹炴椂鍒扮珯');window.location.href='mailto:840892116@qq.com?subject='+subj+'&body='+body;showToast('姝ｅ湪鎵撳紑閭欢瀹㈡埛绔?..')}
+var NOTIFS=[{tag:'鏂扮嚎寮€閫?,bg:'rgba(56,189,248,.12)',color:'#38bdf8',title:'7鍙风嚎姝ｅ紡寮€閫氳繍钀?,desc:'閮戝窞鍦伴搧7鍙风嚎锛堜笢璧碘€斿崡宀楀垬锛変簬2024骞?2鏈?9鏃ユ寮忓紑閫氳繍钀ワ紝璁剧珯16搴с€?,time:'2024-12-29'},{tag:'鏂扮嚎寮€閫?,bg:'rgba(56,189,248,.12)',color:'#38bdf8',title:'8鍙风嚎姝ｅ紡寮€閫氳繍钀?,desc:'閮戝窞鍦伴搧8鍙风嚎锛堝ぉ鍋ユ箹鈥旈瞾搴欙級浜?024骞?2鏈?9鏃ユ寮忓紑閫氳繍钀ワ紝璁剧珯28搴с€?,time:'2024-12-29'},{tag:'杩愯惀鍏憡',bg:'rgba(232,56,79,.12)',color:'#e8384f',title:'鍏冩棪鍋囨湡寤舵椂杩愯惀',desc:'涓轰繚闅滃厓鏃﹀亣鏈熶箻瀹㈠嚭琛岋紝鍚勭嚎璺湯鐝溅寤堕暱杩愯惀30鍒嗛挓銆?,time:'2025-01-01'},{tag:'杩愯惀鍏憡',bg:'rgba(232,56,79,.12)',color:'#e8384f',title:'1鍙风嚎瑗夸笁鐜珯鎭㈠杩愯惀',desc:'1鍙风嚎瑗夸笁鐜珯绔欏彴鏀归€犳柦宸ュ凡瀹屾垚锛屽嵆鏃ヨ捣鎭㈠姝ｅ父杩愯惀銆?,time:'2025-03-15'},{tag:'杩愯惀璋冩暣',bg:'rgba(251,191,36,.12)',color:'#fbbf24',title:'浜斾竴鍋囨湡杩愯惀瀹夋帓',desc:'浜斾竴鏈熼棿锛?鏈?鏃?5鏃ワ級閮戝窞鍦伴搧鍏ㄧ嚎缃戝欢闀胯繍钀ユ椂闂?0鍒嗛挓銆?,time:'2025-04-28'},{tag:'杩愯惀璋冩暣',bg:'rgba(251,191,36,.12)',color:'#fbbf24',title:'6鍙风嚎涓€鏈熷叏绾胯疮閫?,desc:'6鍙风嚎涓€鏈熻淳宄珯鑷虫竻鍗庨檮涓珯鍏ㄧ嚎璐€氳繍钀ワ紝璁剧珯28搴с€?,time:'2024-11-30'},{tag:'瀹樻柟鍏憡',bg:'rgba(167,139,250,.12)',color:'#a78bfa',title:'閮戝窞鍦伴搧涓夋湡瑙勫垝鑾锋壒',desc:'绗笁鏈熷缓璁捐鍒掕幏鎵癸紝鏂板7鍙风嚎銆?鍙风嚎绛夌嚎璺€?,time:'2024-10-15'},{tag:'瀹夊叏鎻愮ず',bg:'rgba(239,68,68,.12)',color:'#ef4444',title:'鍦伴搧瀹夋娓╅Θ鎻愮ず',desc:'鎻愰啋骞垮ぇ涔樺閰嶅悎瀹夋宸ヤ綔锛屼弗绂佹惡甯﹀嵄闄╁搧杩涚珯涔樿溅銆?,time:'2024-08-20'}];
+function fetchNotifs(){var h='';NOTIFS.forEach(function(n){h+='<div class="notif-card"><span class="n-tag" style="background:'+n.bg+';color:'+n.color+'">'+n.tag+'</span><div class="n-title">'+n.title+'</div><div class="n-desc">'+n.desc+'</div><div class="n-time">'+n.time+'</div></div>'});document.getElementById('notifContent').innerHTML=h}
 fetchNotifs();
 
-/* ─────────────────────────────────────────────
-   初始化
-───────────────────────────────────────────── */
-setTimeout(function(){
-  if(AMAP_KEY){
-    scheduleGaode();
-  }else{
-    var me=document.getElementById('meta');
-    me.textContent='⚡ 点此接入高德 Key';
-    me.style.cursor='pointer';
-    me.style.textDecoration='underline';
-    me.onclick=promptAmapKey;
-  }
-},800);
+setTimeout(function(){if(AMAP_KEY){scheduleGaode()}},1000);
 renderTabs();updateDir();buildStations();tick();
 </script>
 </body>
